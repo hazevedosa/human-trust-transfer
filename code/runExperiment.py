@@ -651,7 +651,7 @@ def getInitialProjectionMatrix(taskfeatures, reptype, taskrepsize, doplot=False,
             preddists = mds(inppairs, inpalltasks)
             loss = torch.mean(torch.pow(preddists - inpdistlist, 2.0))
             optimizer.zero_grad()
-            print(t, loss.data[0])
+            print(t, loss.data.item())
             optimizer.zero_grad()
 
     t1 = time.time()
@@ -901,21 +901,21 @@ def main(
                     # print(predtrust_test.data, outtrustpred_test.data)
                     mae = metrics.mean_absolute_error(predtrust_test.data, outtrustpred_test.data)
 
-                    print(t, loss.data[0], valloss.data[0], predloss.data[0], mae)
+                    print(t, loss.data.item(), valloss.data.item(), predloss.data.item(), mae)
                     optimizer.zero_grad()
 
                     # if validation loss has increased for stopcount iterations
 
                     augname = model.modelname + "_" + str(excludeid) + ".pth"
-                    if valloss.data[0] <= bestvalloss:
+                    if valloss.data.item() <= bestvalloss:
                         torch.save(model, os.path.join(modeldir, augname) )
-                        print(valloss.data[0], bestvalloss, "Model saved")
-                        bestvalloss = valloss.data[0]
+                        print(valloss.data.item(), bestvalloss, "Model saved")
+                        bestvalloss = valloss.data.item()
                         counter = 0
                     else:
-                        if counter < stopcount and (valloss.data[0]-bestvalloss) <= 0.1:
+                        if counter < stopcount and (valloss.data.item()-bestvalloss) <= 0.1:
                             torch.save(model, os.path.join(modeldir, augname))
-                            print(valloss.data[0], bestvalloss, "Model saved : POST", counter)
+                            print(valloss.data.item(), bestvalloss, "Model saved : POST", counter)
                         counter += 1
 
             if counter >= stopcount and t > burnin:
@@ -940,7 +940,7 @@ def main(
     predloss = -(torch.dot(outtrustpred_test, torch.log(predtrust_test)) + torch.dot((1 - outtrustpred_test),
                                                                                      torch.log(1.0 - predtrust_test))) / \
                predtrust_test.shape[0]
-    predloss = predloss.data[0]
+    predloss = predloss.data.item()
 
     return (mae, predloss, res)
 
@@ -948,6 +948,8 @@ def main(
 # In[176]:
 
 if __name__ == "__main__":
+
+    print("just checking")
 
     dom = sys.argv[1] #"household" or "driving"
     reptype = "wordfeat"
