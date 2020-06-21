@@ -735,6 +735,7 @@ def main(
     # create primary dataset
     dataset = createDataset(data, reptype, allfeatures)
 
+
     # create dataset splits
     expdata = getTrainTestValSplit(data, dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
     
@@ -749,6 +750,7 @@ def main(
     inptaskspred = Variable(dtype(expdata["taskspredfeats_train"]), requires_grad=False)
     outtrustpred = Variable(dtype(expdata["trustpred_train"]), requires_grad=False)
 
+
     inptasksobs_val = Variable(dtype(expdata["tasksobsfeats_val"]), requires_grad=False)
     inptasksperf_val = Variable(dtype(expdata["tasksobsperf_val"]), requires_grad=False)
     inptaskspred_val = Variable(dtype(expdata["taskspredfeats_val"]), requires_grad=False)
@@ -758,6 +760,9 @@ def main(
     inptasksperf_test = Variable(dtype(expdata["tasksobsperf_test"]), requires_grad=False)
     inptaskspred_test = Variable(dtype(expdata["taskspredfeats_test"]), requires_grad=False)
     outtrustpred_test = Variable(dtype(expdata["trustpred_test"]), requires_grad=False)
+
+    print(outtrustpred.size())
+    fod()
 
     
     learning_rate = 1e-3
@@ -898,10 +903,10 @@ def main(
                     counter = 0
                     restartopt = True
                 else:
-                    # print(predtrust_test.data, outtrustpred_test.data)
+                    print("\npredtrust_test: ", predtrust_test.data, "\n\nouttrustpred_test: ", outtrustpred_test.data)
                     mae = metrics.mean_absolute_error(predtrust_test.data, outtrustpred_test.data)
 
-                    print(t, loss.data.item(), valloss.data.item(), predloss.data.item(), mae)
+                    print("\nepoch: ", t, "loss: ", loss.data.item(), "valloss: ", valloss.data.item(),"predloss: ", predloss.data.item(),"mae: ", mae)
                     optimizer.zero_grad()
 
                     # if validation loss has increased for stopcount iterations
@@ -909,7 +914,7 @@ def main(
                     augname = model.modelname + "_" + str(excludeid) + ".pth"
                     if valloss.data.item() <= bestvalloss:
                         torch.save(model, os.path.join(modeldir, augname) )
-                        print(valloss.data.item(), bestvalloss, "Model saved")
+                        print("\nvalloss: ", valloss.data.item(), "bestvalloss: ", bestvalloss, "Model saved")
                         bestvalloss = valloss.data.item()
                         counter = 0
                     else:
