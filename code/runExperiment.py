@@ -761,8 +761,6 @@ def main(
     inptaskspred_test = Variable(dtype(expdata["taskspredfeats_test"]), requires_grad=False)
     outtrustpred_test = Variable(dtype(expdata["trustpred_test"]), requires_grad=False)
 
-    print(outtrustpred.size())
-    fod()
 
     
     learning_rate = 1e-3
