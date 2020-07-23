@@ -240,7 +240,8 @@ class GPTrustTransfer(torch.nn.Module):
         
     def getPriorMean(self,x):
         if self.usepriormean:
-            return torch.dot(self.Ay, x) + self.by
+            
+            return torch.dot(self.Ay[0], x[0]) + self.by
         elif self.usepriorpoints:
             # zero mean function
             return Variable(dtype([0.0]))
@@ -556,6 +557,8 @@ class BaselineTrustModel(torch.nn.Module):
     def forward(self, inptasksobs, inptasksperf, inptaskspred):
         N = inptasksobs.shape[1]
         predtrust = Variable(dtype(np.zeros((N,1))), requires_grad=False)
+
+        print(self.trust0)
 
         for i in range(N): 
             trust = self.trust0

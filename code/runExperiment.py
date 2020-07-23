@@ -141,6 +141,8 @@ def loadData(dom="household", bound01=True):
         pretrust_scores = sigmoid(pretrust_scores-3.5)
         trust_scores = sigmoid(trust_scores-3.5)#(trust_scores - 1) / 6
 
+
+
     data = {
         "tasks_obs_perf": tasks_obs_perf,
         "tasks_obs": tasks_obs,
@@ -297,25 +299,31 @@ def createDataset(data, reptype, allfeatures):
         taskfeatures = allfeatures["pca"]
     else:
         raise ValueError("no such reptype")
+    
     ntasks = taskfeatures.shape[0]
     print("num features:", nfeats)
-    print(taskfeatures.shape)
+
+
     # create 1-hot representation for tasks observed
     N = nparts
     tasksobsfeats = np.zeros((obsseqlen, nparts, nfeats))
     tasksobsids = np.zeros((obsseqlen, nparts, 1))
+
     for i in range(N):
         for t in range(obsseqlen):
             tasksobsids[t, i, :] = tasks_obs[i, t]
             tasksobsfeats[t, i, :] = getInputRep(tasks_obs[i, t], nfeats, reptype=reptype, feats=taskfeatures)
+
     tasksobsfeats = np.tile(tasksobsfeats, [1, predseqlen, 1])
     tasksobsids = np.tile(tasksobsids, [1, predseqlen, 1])
 
     tasksobsperf = np.zeros((obsseqlen, nparts, nperf))
+
     for i in range(N):
         for t in range(obsseqlen):
             tasksobsperf[t, i, tasks_obs_perf[i, t]] = 1
     tasksobsperf = np.tile(tasksobsperf, [1, predseqlen, 1])
+
 
     # create 1-hot representation for tasks to predict
     ntotalpred = int(np.prod(tasks_pred.shape))
@@ -331,6 +339,8 @@ def createDataset(data, reptype, allfeatures):
 
     taskpredids = tasks_pred_T
     taskpredtrust = trust_scores_T
+
+
     if include_prepreds:
         pretasksobsids = np.zeros((obsseqlen, N, 1))
         pretasksobsfeats = np.zeros((obsseqlen, N, nfeats))
@@ -364,6 +374,13 @@ def createDataset(data, reptype, allfeatures):
         taskpredtrust = np.concatenate([pretrust_scores_T, trust_scores_T])
 
     # ok, I got too lazy to create a dict, using a tuple for now.
+
+    # So, here we have 192 or 186 dimensions long datasets. Basically they have stacked up the 1st ratings, 
+    # without observed tasks and 2nd ratings, with the observed tasks. The observed tasks in the first place are 0s --- there were no observed tasks at all...
+    # the observed tasks in the second half are those named A and B in the original dataset.
+    # I dont know why there is trustpred and taskpredtrust. they have basically the same data...
+
+
     dataset = (tasksobsfeats, tasksobsperf, taskspredfeats,
                trustpred, tasksobsids, taskpredids, taskpredtrust, data["labels"])
 
@@ -642,10 +659,15 @@ def getInitialProjectionMatrix(taskfeatures, reptype, taskrepsize, doplot=False,
             optimizer.zero_grad()
             preddists = mds(inppairs, inpalltasks)
             loss = torch.mean(torch.pow(preddists - inpdistlist, 2.0))
-            loss.backward()
+            if usepriorpoints:
+                loss.backward(retain_graph=True)
+            else:
+                loss.backward()
             return loss
 
+
         optimizer.step(closure)
+
 
         if t % 10 == 0:
             preddists = mds(inppairs, inpalltasks)
@@ -761,8 +783,7 @@ def main(
     inptaskspred_test = Variable(dtype(expdata["taskspredfeats_test"]), requires_grad=False)
     outtrustpred_test = Variable(dtype(expdata["trustpred_test"]), requires_grad=False)
 
-
-    
+   
     learning_rate = 1e-3
 
     if modeltype == "gp":
@@ -850,21 +871,29 @@ def main(
 
             def closure():
                 N = inptaskspred.shape[0]
+                
                 predtrust = model(inptasksobs, inptasksperf, inptaskspred)
                 predtrust = torch.squeeze(predtrust)
                 # logloss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0)) # / 2*torch.exp(obsnoise))
                 loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
                          torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
-                
+
                 optimizer.zero_grad()
-                loss.backward()
+
+                if usepriorpoints:
+                    loss.backward(retain_graph=True)
+                else:
+                    loss.backward()
                 return loss
 
+
             optimizer.step(closure)
+
 
             if t % reportperiod == 0:
                 # compute training loss
                 predtrust = model(inptasksobs, inptasksperf, inptaskspred)
+
                 predtrust = torch.squeeze(predtrust)
                 loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
                          torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / inptaskspred.shape[0]
@@ -879,6 +908,8 @@ def main(
                 predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test))
                 predloss = -(torch.dot(outtrustpred_test, torch.log(predtrust_test)) +
                              torch.dot((1 - outtrustpred_test), torch.log(1.0 - predtrust_test))) / predtrust_test.shape[0]
+
+
 
 
                 #print(model.wb, model.wtp, model.trust0, model.sigma0)
@@ -901,12 +932,12 @@ def main(
                     counter = 0
                     restartopt = True
                 else:
-                    print("\npredtrust_test: ", predtrust_test.data, "\n\nouttrustpred_test: ", outtrustpred_test.data)
+                    
                     mae = metrics.mean_absolute_error(predtrust_test.data, outtrustpred_test.data)
 
                     print("\nepoch: ", t, "loss: ", loss.data.item(), "valloss: ", valloss.data.item(),"predloss: ", predloss.data.item(),"mae: ", mae)
                     optimizer.zero_grad()
-
+                    
                     # if validation loss has increased for stopcount iterations
 
                     augname = model.modelname + "_" + str(excludeid) + ".pth"
@@ -937,12 +968,11 @@ def main(
     res = np.zeros((predtrust_test.shape[0], 2))
     res[:, 0] = predtrust_test.data[:]
     res[:, 1] = outtrustpred_test.data[:]
-    print(res)
+
 
     mae = metrics.mean_absolute_error(predtrust_test.data, outtrustpred_test.data)
-    predloss = -(torch.dot(outtrustpred_test, torch.log(predtrust_test)) + torch.dot((1 - outtrustpred_test),
-                                                                                     torch.log(1.0 - predtrust_test))) / \
-               predtrust_test.shape[0]
+    predloss = -(torch.dot(outtrustpred_test, torch.log(predtrust_test)) + 
+                    torch.dot((1 - outtrustpred_test), torch.log(1.0 - predtrust_test))) / predtrust_test.shape[0]
     predloss = predloss.data.item()
 
     return (mae, predloss, res)
@@ -951,8 +981,6 @@ def main(
 # In[176]:
 
 if __name__ == "__main__":
-
-    print("just checking")
 
     dom = sys.argv[1] #"household" or "driving"
     reptype = "wordfeat"
@@ -1006,7 +1034,11 @@ if __name__ == "__main__":
 
 
         # save to disk after each run
+        print("printing results: mae, predloss, predtrust_test --- outtrustpred_test\n\n")
         print(result)
+
+        print("\n\n")        
+
         resultsdir = "results"
         filename =  dom + "_" + modeltype + "_" + str(taskrepsize) + "_" + splittype + "_" + str(gpmode) + ".pkl"
         with open(os.path.join(resultsdir, filename), 'wb') as output:
