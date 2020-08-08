@@ -247,6 +247,7 @@ class GPTrustTransfer(torch.nn.Module):
             return Variable(dtype([0.0]))
         else:
             #constant mean
+
             return self.by 
         
     def forward(self, inptasksobs, inptasksperf, inptaskspred):
@@ -271,13 +272,17 @@ class GPTrustTransfer(torch.nn.Module):
                     x = torch.matmul(Alp, inptasksobs[0, i, :]).view(1, self.taskrepsize)
             else:
                 x = inptasksobs[0, i, :].view(1, self.inpsize)
+
                 
-                
+
             if (x == 0).all():
+                
                 if self.usepriorpoints:
                     alpha, C, bvs = self.GPupdate(self.priorsucc, self.succ, self.kfunc, self.kparams, alpha, C, bvs, rawx=None)
                     alpha, C, bvs = self.GPupdate(self.priorfail, self.fail, self.kfunc, self.kparams, alpha, C, bvs, rawx=None)
                 noop = None
+
+                
             else:
                 # first update "priors"
                 if self.usepriorpoints:
@@ -285,19 +290,29 @@ class GPTrustTransfer(torch.nn.Module):
                     alpha, C, bvs = self.GPupdate(self.priorfail, self.fail, self.kfunc, self.kparams, alpha, C, bvs, rawx=None)
 
                 # then update observed sequence
+
+                print(self.obsseqlen)
+                self.obsseqlen = 8
+                print(self.obsseqlen)
+
+
                 for t in range(self.obsseqlen):
                     if self.kerneltype == self.FAKERNEL:
                         if self.reptype == "1hot":
                             x = torch.matmul(Alp, inptasksobs[t, i, :]).view(1, self.taskrepsize)
                         else:
                             x = torch.matmul(Alp, inptasksobs[t, i, :]).view(1, self.taskrepsize)
+
                     else:
                         x = inptasksobs[t, i, :].view(1, self.inpsize)
-
                         #estdiff = self.getDifficulty(x)
+
                     if (inptasksperf[t, i, 0] == 1).all():
+                        print("fail")
                         y = self.fullfail
+                    
                     else:
+                        print("success")
                         y = self.fullsucc
 
                     alpha, C, bvs = self.GPupdate(x, y, self.kfunc, self.kparams, alpha, C, bvs, rawx=inptasksobs[t, i, :])
@@ -308,8 +323,11 @@ class GPTrustTransfer(torch.nn.Module):
                     x = torch.matmul(Alp, inptaskspred[i, :]).view(1, self.taskrepsize)
                 else:
                     x = torch.matmul(Alp, inptaskspred[i, :]).view(1, self.taskrepsize)
+
             else:
                 x = inptaskspred[i, :].view(1, self.inpsize)
+
+
             ypred, psuccess, error = self.GPpredict(x, self.kfunc, self.kparams, alpha, C, bvs, rawx = inptaskspred[i, :])
             predtrust[i] = psuccess
             errors[i] = error
@@ -335,13 +353,18 @@ class GPTrustTransfer(torch.nn.Module):
 
     def sekernel(self, x1, x2, kparams):
 
+
         s = kparams['s']
         phi = kparams['phi']
+
+
+
         # d = torch.div((x1-x2), torch.pow(phi, 2.0))
         # d = (x1-x2)
         # phi = torch.clamp(phi, -10, 0.01)
         d = torch.div((x1 - x2), torch.exp(phi))
         # print(d)
+
         k = s * s * torch.exp(-torch.dot(d.view(-1), d.view(-1)))
         return k
 
@@ -358,6 +381,7 @@ class GPTrustTransfer(torch.nn.Module):
         return k
 
     def getKernelMatrix(self, X, kfunc, kparams, X2=None):
+
         # noisevar = kparams['noisevar']
         if X2 is None:
             n = X.shape[0]
@@ -393,7 +417,11 @@ class GPTrustTransfer(torch.nn.Module):
 
         if bvs is None:
             # first ever update
+
             alpha = (y - mx) / kstar
+
+
+
             # print('alpha', alpha)
             C = Variable(dtype(np.zeros((1, 1))))
             if usecuda:
@@ -431,13 +459,13 @@ class GPTrustTransfer(torch.nn.Module):
                 rclp = 1.0  # clamp value for numerical stability
                 q = (y / sx) * (dErfz / Erfz)
                 q = torch.clamp(q, -rclp, rclp)
-                r = (1.0 / s2) * ((dErfz2 / Erfz) - torch.pow((dErfz / Erfz), 2.0));
+                r = (1.0 / s2) * ((dErfz2 / Erfz) - torch.pow((dErfz / Erfz), 2.0))
                 r = torch.clamp(r, -rclp, rclp)
                 # print('r', r)
             else:
                 # regression updates
-                r = -1.0 / (s2);
-                q = -r * (y - m);
+                r = -1.0 / (s2)
+                q = -r * (y - m)
 
             if (r != r).any() or (q != q).any():
                 return (alpha, C, bvs)
@@ -469,9 +497,11 @@ class GPTrustTransfer(torch.nn.Module):
         kstar = kfunc(x, x, kparams)
 
         mx = self.getPriorMean(x)
+
         noise = torch.exp(self.noisevar) + 0.01
 
         s2 = 0.0
+
         if bvs is None:
             m = -mx
             s2 = kstar + noise

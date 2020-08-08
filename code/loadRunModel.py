@@ -154,8 +154,6 @@ def loadData(dom="household", bound01=True):
         "labels": labels,
     }
 
-
-
     return data, nparts
 
 
@@ -286,8 +284,6 @@ def createDataset(data, reptype, allfeatures):
     pretrust_scores = data["pretrust_scores"]
     nparts = data["nparts"]
 
-
-
     if reptype == "1hot":
         nfeats = 13
     elif reptype == "taskid":
@@ -385,9 +381,10 @@ def createDataset(data, reptype, allfeatures):
     # I dont know why there is trustpred and taskpredtrust. they have basically the same data...
 
 
-
     dataset = (tasksobsfeats, tasksobsperf, taskspredfeats,
                trustpred, tasksobsids, taskpredids, taskpredtrust, data["labels"])
+
+
 
     return dataset
 
@@ -553,7 +550,6 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
         "trustpred_test": trustpred_test,
         "labels": data["labels"]
     }
-
 
     return expdata
 
@@ -760,6 +756,7 @@ def main(
     
     allfeatures = {"wordfeat": wordfeatures, "tsne": tsnefeatures, "pca": pcafeatures}
 
+
     # create primary dataset
     dataset = createDataset(data, reptype, allfeatures)
 
@@ -795,7 +792,9 @@ def main(
     if modeltype == "gp":
         learning_rate = 1e-1
         usepriormean = usepriormean
-        obsseqlen = 2
+
+        obsseqlen = 8
+
         phiinit = 1.0
         weight_decay = 0.01 #0.01
         modelparams = {
@@ -859,118 +858,152 @@ def main(
     
     modeldir = "savedmodels"
     
-    for rep in range(1):
-        print("REP", rep)
-        model = initModel(modeltype, modelname, parameters=modelparams)
-        # optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
-        #if modeltype == "neural"
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        #optimizer = torch.optim.LBFGS(model.parameters(), lr=learning_rate, max_iter=10, max_eval=20)
-        #optimizer = torch.optim.LBFGS(model.parameters(), lr=learning_rate)
-        counter = 0
+    # for rep in range(1):
+    #     print("REP", rep)
+    #     model = initModel(modeltype, modelname, parameters=modelparams)
+    #     # optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
+    #     #if modeltype == "neural"
+    #     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    #     #optimizer = torch.optim.LBFGS(model.parameters(), lr=learning_rate, max_iter=10, max_eval=20)
+    #     #optimizer = torch.optim.LBFGS(model.parameters(), lr=learning_rate)
+    #     counter = 0
 
-        torch.save(model, os.path.join(modeldir, model.modelname + ".pth"))
-        restartopt = False
-        t = 1
-        #l2comp = nn.L2Loss()
-        while t < 500:
+    #     torch.save(model, os.path.join(modeldir, model.modelname + ".pth"))
+    #     restartopt = False
+    #     t = 1
+    #     #l2comp = nn.L2Loss()
+    #     while t < 500:
 
-            def closure():
-                N = inptaskspred.shape[0]
+    #         def closure():
+    #             N = inptaskspred.shape[0]
                 
-                predtrust = model(inptasksobs, inptasksperf, inptaskspred)
-                predtrust = torch.squeeze(predtrust)
-                # logloss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0)) # / 2*torch.exp(obsnoise))
-                loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
-                         torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
+    #             predtrust = model(inptasksobs, inptasksperf, inptaskspred)
+    #             predtrust = torch.squeeze(predtrust)
+    #             # logloss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0)) # / 2*torch.exp(obsnoise))
+    #             loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
+    #                      torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
 
-                optimizer.zero_grad()
+    #             optimizer.zero_grad()
 
-                if usepriorpoints:
-                    loss.backward(retain_graph=True)
-                else:
-                    loss.backward()
-                return loss
-
-
-            optimizer.step(closure)
+    #             if usepriorpoints:
+    #                 loss.backward(retain_graph=True)
+    #             else:
+    #                 loss.backward()
+    #             return loss
 
 
-            if t % reportperiod == 0:
-                # compute training loss
-                predtrust = model(inptasksobs, inptasksperf, inptaskspred)
-
-                predtrust = torch.squeeze(predtrust)
-                loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
-                         torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / inptaskspred.shape[0]
-
-                # compute validation loss
-                predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val)
-                predtrust_val = torch.squeeze(predtrust_val)
-                valloss = -(torch.dot(outtrustpred_val, torch.log(predtrust_val)) +
-                            torch.dot((1 - outtrustpred_val), torch.log(1.0 - predtrust_val))) / predtrust_val.shape[0]
-
-                # compute prediction loss
-                predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test))
-                predloss = -(torch.dot(outtrustpred_test, torch.log(predtrust_test)) +
-                             torch.dot((1 - outtrustpred_test), torch.log(1.0 - predtrust_test))) / predtrust_test.shape[0]
+    #         optimizer.step(closure)
 
 
+    #         if t % reportperiod == 0:
+    #             # compute training loss
+    #             predtrust = model(inptasksobs, inptasksperf, inptaskspred)
+
+    #             predtrust = torch.squeeze(predtrust)
+    #             loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
+    #                      torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / inptaskspred.shape[0]
+
+    #             # compute validation loss
+    #             predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val)
+    #             predtrust_val = torch.squeeze(predtrust_val)
+    #             valloss = -(torch.dot(outtrustpred_val, torch.log(predtrust_val)) +
+    #                         torch.dot((1 - outtrustpred_val), torch.log(1.0 - predtrust_val))) / predtrust_val.shape[0]
+
+    #             # compute prediction loss
+    #             predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test))
+    #             predloss = -(torch.dot(outtrustpred_test, torch.log(predtrust_test)) +
+    #                          torch.dot((1 - outtrustpred_test), torch.log(1.0 - predtrust_test))) / predtrust_test.shape[0]
 
 
-                #print(model.wb, model.wtp, model.trust0, model.sigma0)
 
-                #check for nans
-                checkval = np.sum(np.array(predtrust_test.data))
-                if np.isnan(checkval) or np.isinf(checkval):
-                    # check if we have already restarted once
-                    if restartopt:
-                        #we've already done this, fail out.
-                        #break out.
-                        print("Already restarted once. Quitting")
-                        break
 
-                    # reinitialize model and switch optimizer
-                    print("NaN value encountered. Restarting opt")
-                    model = initModel(modeltype, modelname, parameters=modelparams)
-                    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-                    t = 1
-                    counter = 0
-                    restartopt = True
-                else:
+    #             #print(model.wb, model.wtp, model.trust0, model.sigma0)
+
+    #             #check for nans
+    #             checkval = np.sum(np.array(predtrust_test.data))
+    #             if np.isnan(checkval) or np.isinf(checkval):
+    #                 # check if we have already restarted once
+    #                 if restartopt:
+    #                     #we've already done this, fail out.
+    #                     #break out.
+    #                     print("Already restarted once. Quitting")
+    #                     break
+
+    #                 # reinitialize model and switch optimizer
+    #                 print("NaN value encountered. Restarting opt")
+    #                 model = initModel(modeltype, modelname, parameters=modelparams)
+    #                 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    #                 t = 1
+    #                 counter = 0
+    #                 restartopt = True
+    #             else:
                     
-                    mae = metrics.mean_absolute_error(predtrust_test.data, outtrustpred_test.data)
+    #                 mae = metrics.mean_absolute_error(predtrust_test.data, outtrustpred_test.data)
 
-                    print("\nepoch: ", t, "loss: ", loss.data.item(), "valloss: ", valloss.data.item(),"predloss: ", predloss.data.item(),"mae: ", mae)
-                    optimizer.zero_grad()
+    #                 print("\nepoch: ", t, "loss: ", loss.data.item(), "valloss: ", valloss.data.item(),"predloss: ", predloss.data.item(),"mae: ", mae)
+    #                 optimizer.zero_grad()
                     
-                    # if validation loss has increased for stopcount iterations
+    #                 # if validation loss has increased for stopcount iterations
 
-                    augname = model.modelname + "_" + str(excludeid) + ".pth"
-                    if valloss.data.item() <= bestvalloss:
-                        torch.save(model, os.path.join(modeldir, augname) )
-                        print("\nvalloss: ", valloss.data.item(), "bestvalloss: ", bestvalloss, "Model saved")
-                        bestvalloss = valloss.data.item()
-                        counter = 0
-                    else:
-                        if counter < stopcount and (valloss.data.item()-bestvalloss) <= 0.1:
-                            torch.save(model, os.path.join(modeldir, augname))
-                            print(valloss.data.item(), bestvalloss, "Model saved : POST", counter)
-                        counter += 1
+    #                 augname = model.modelname + "_" + str(excludeid) + ".pth"
+    #                 if valloss.data.item() <= bestvalloss:
+    #                     torch.save(model, os.path.join(modeldir, augname) )
+    #                     print("\nvalloss: ", valloss.data.item(), "bestvalloss: ", bestvalloss, "Model saved")
+    #                     bestvalloss = valloss.data.item()
+    #                     counter = 0
+    #                 else:
+    #                     if counter < stopcount and (valloss.data.item()-bestvalloss) <= 0.1:
+    #                         torch.save(model, os.path.join(modeldir, augname))
+    #                         print(valloss.data.item(), bestvalloss, "Model saved : POST", counter)
+    #                     counter += 1
 
-            if counter >= stopcount and t > burnin:
-                #torch.save(model, modeldir+ model.modelname + ".pth")
-                break
+    #         if counter >= stopcount and t > burnin:
+    #             #torch.save(model, modeldir+ model.modelname + ".pth")
+    #             break
 
-            t = t + 1
+    #         t = t + 1
 
     t1 = time.time()
     print("Total time: ", t1 - t0)
 
     model = torch.load(os.path.join(modeldir,  modelname + "_" + str(excludeid) + ".pth"))
 
+
+
+    # only one task to predict
+    inptasksobs_azv = inptasksobs_test[:, 5:6, :]
+    inptasksobs_azv[0, :, :] = inptasksobs_test[1, 5:6, :]
+
+    inptasksobs_azv = torch.cat((inptasksobs_azv, inptasksobs_azv, inptasksobs_azv, inptasksobs_azv), 0)
+
+    inptasksperf_azv = inptasksperf_test[:, 5:6, :]
+    inptasksperf_azv = torch.cat((inptasksperf_azv, inptasksperf_azv, inptasksperf_azv, inptasksperf_azv), 0)
+
+    print(inptasksperf_azv)
+
+
+    # inptasksperf_azv[1, :, 1] = 0
+    # inptasksperf_azv[1, :, 0] = 1
+
+    # inptasksperf_azv[3, :, 1] = 0
+    # inptasksperf_azv[3, :, 0] = 1
+
+    # inptasksperf_azv[5, :, 1] = 0
+    # inptasksperf_azv[5, :, 0] = 1
+
+    # inptasksperf_azv[7, :, 1] = 0
+    # inptasksperf_azv[7, :, 0] = 1
+
+    inptaskspred_azv = inptaskspred_test[15:16, :]
+
+    print(inptasksobs_azv)
+    print(inptasksperf_azv)
+    print(inptaskspred_azv)
+
     # make predictions using trained model and compute metrics
-    predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test))
+    predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv))
+
+    print(predtrust_test)
 
     res = np.zeros((predtrust_test.shape[0], 2))
     res[:, 0] = predtrust_test.data[:]
