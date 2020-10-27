@@ -750,8 +750,8 @@ def main(
         recreateWordVectors()
 
     # load word features 
-    # wordfeatures = loadWordFeatures(dom, loadpickle=True)
-    wordfeatures = loadWordFeatures(dom, loadpickle=False)
+    wordfeatures = loadWordFeatures(dom, loadpickle=True)
+    # wordfeatures = loadWordFeatures(dom, loadpickle=False)
 
     
     # in the experiments in the paper, we use the word features directly. However, 
