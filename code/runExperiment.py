@@ -751,7 +751,8 @@ def main(
 
     # load word features 
     wordfeatures = loadWordFeatures(dom, loadpickle=True)
-    print(wordfeatures.shape)
+
+    
     
     # in the experiments in the paper, we use the word features directly. However, 
     # you can also use tsne or pca dim-reduced features. 
