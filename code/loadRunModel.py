@@ -21,6 +21,8 @@ from sklearn.manifold import TSNE
 import sklearn.metrics as metrics
 from sklearn.decomposition import PCA
 
+import scipy.io as sio
+
 import spacy
 from spacy.language import Language
 
@@ -383,12 +385,51 @@ def createDataset(data, reptype, allfeatures):
     # I dont know why there is trustpred and taskpredtrust. they have basically the same data...
 
 
-    dataset = (tasksobsfeats, tasksobsperf, taskspredfeats,
-               trustpred, tasksobsids, taskpredids, taskpredtrust, data["labels"])
+    dataset = (
+               tasksobsfeats,   # (2, 192, 50) or (2, 186, 50)  [numpy.ndarray]
+               tasksobsperf,    # (2, 192, 2) or (2, 186, 2)    [numpy.ndarray]
+               taskspredfeats,  # (192, 50) or (186, 50)        [numpy.ndarray]
+               trustpred,       # (192,) or (186,)              [numpy.ndarray]
+               tasksobsids,     # (2, 192, 1) or (2, 186, 1)    [numpy.ndarray]
+               taskpredids,     # (192, 1) or (186, 1)          [numpy.ndarray]
+               taskpredtrust,   # (192, 1) or (186, 1)          [numpy.ndarray]
+               data["labels"]   # ['0-0', 'A-5', 'A-3', 'A-6', 'A-1', 'A-4', 'A-2', 'B-4', 'B-2', 'B-5', 'B-1', 'B-6', 'B-3'] for household [list]
+              )
 
 
 
     return dataset
+
+
+def createDataset_fromMatFile(mat_file_name):
+    
+    mat_contents = sio.loadmat(mat_file_name)
+
+    tasksobsfeats   = mat_contents["tasksobsfeats"]
+    tasksobsperf    = mat_contents["tasksobsperf"]
+    taskspredfeats  = mat_contents["taskspredfeats"]
+    trustpred       = mat_contents["trustpred"]
+    tasksobsids     = mat_contents["tasksobsids"]
+    taskpredids     = mat_contents["taskpredids"]
+    taskpredtrust   = mat_contents["taskpredtrust"]
+    data_labels  = ['0-0', 'H-1', 'H-2', 'H-3', 'H-4', 'H-5']
+
+    trustpred = np.squeeze(trustpred)
+    tasksobsids = np.expand_dims(tasksobsids, axis=2)
+    
+    dataset = (
+               tasksobsfeats,   # (50, 250, 50) [numpy.ndarray]
+               tasksobsperf,    # (50, 250, 2)  [numpy.ndarray]
+               taskspredfeats,  # (250, 50)     [numpy.ndarray]
+               trustpred,       # (250,)        [numpy.ndarray]
+               tasksobsids,     # (50, 250, 1)  [numpy.ndarray]
+               taskpredids,     # (250, 1)      [numpy.ndarray]
+               taskpredtrust,   # (250, 1)      [numpy.ndarray]
+               data_labels      # ???????????? [list]
+    )
+
+    return dataset
+
 
 
 def computeTSNEFeatures(wordfeatures):
@@ -740,7 +781,7 @@ def main(
 
     # load the data
     data, nparts = loadData(dom)
-    # print(data)
+
 
     # recreate word vectors if needed
     # e.g., when you download new word features from glove. ----- To do it, must download "glove.6B.50d.txt" which is about 163.41 MB
@@ -763,7 +804,10 @@ def main(
 
 
     # create primary dataset
-    dataset = createDataset(data, reptype, allfeatures)
+    # dataset = createDataset(data, reptype, allfeatures)
+
+    mat_file_name = 'RawDataset.mat'
+    dataset = createDataset_fromMatFile(mat_file_name)
 
 
     # create dataset splits
@@ -881,7 +925,7 @@ def main(
     
     modeldir = "savedmodels"
     
-    runOptimization = True
+    runOptimization = False
 
     if runOptimization:
 
