@@ -35,7 +35,7 @@ from trustmodels import *
 
 
 # some globals
-usecuda = False
+usecuda = True
 usecuda = usecuda and torch.cuda.is_available()
 dtype = torch.FloatTensor
 if usecuda:
@@ -149,6 +149,8 @@ class GPTrustTransfer(torch.nn.Module):
         
         # prior mean function
         self.usepriormean = usepriormean
+
+
         self.by = Parameter(dtype(np.eye(1))) # this is used for a constant 
         if usepriormean:
             Ay = np.random.randn(1, taskrepsize)*0.5 #0.5 works
@@ -180,6 +182,8 @@ class GPTrustTransfer(torch.nn.Module):
             # A = np.random.randn(inpsize,taskrepsize) #np.ones((taskrepsize,inpsize))
 
         self.A = Parameter(dtype(np.array(A)))
+        self.reg_const = Parameter(dtype(np.eye(1)))
+
         # self.A = Variable(dtype(np.array(A)), requires_grad=False)
         # self.s = Parameter(dtype(np.eye(1)))
         self.s = Variable(dtype(np.eye(1)), requires_grad=False)
@@ -484,7 +488,7 @@ class GPTrustTransfer(torch.nn.Module):
 
             Erfz = (torch.erf(z / self.sqrt2) + 1) / 2
             # print('Erfz', Erfz)
-            regl = 1.0 #1.0  # dampener: in case. ---- try 0.5??
+            regl = self.reg_const #1.0  # dampener: in case. ---- try 0.5??
             constl = regl * 1.0 / np.sqrt(2 * np.pi)
             dErfz = torch.exp(-torch.pow(z, 2.0) / 2.0) * constl
             dErfz2 = dErfz * (-z) * regl
