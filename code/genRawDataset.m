@@ -66,32 +66,35 @@ for i = 1:50
     end
 end
 
+Trusts = [[0.5 0.5 0.5 0.5 0.5]; Trusts];
+
+
 % build matrices
-matTasks = zeros(50, 50);
-matPerformances = zeros(50, 50);
+matTasks = zeros(51, 51);
+matPerformances = zeros(51, 51);
 
 
 for i = 1:50
     for j = 1:i
-        matTasks(i, 51 - j) = stackVec(1, i - j + 1);
-        matPerformances(i, 51 - j) = stackVec(2, i - j + 1);
+        matTasks(i + 1, 51 - j + 1) = stackVec(1, i - j + 1);
+        matPerformances(i + 1, 51 - j + 1) = stackVec(2, i - j + 1);
     end
 end
 
 
 
-obsTasksStruct = zeros(50, 50, 50);
+obsTasksStruct = zeros(51, 51, 50);
 
-for i = 1:50
-    for j = 1:50
+for i = 1:51
+    for j = 1:51
         taskID = matTasks(i, j);
         obsTasksStruct(i, j, :) = obsTasks(taskID + 1, :);
     end
 end
     
 
-for i = 1:50
-    for j = 1:50
+for i = 1:51
+    for j = 1:51
         taskRawPerf = matPerformances(i, j);
         if taskRawPerf == 0
             matSuccess(i, j) = 0;
@@ -113,20 +116,20 @@ matSuccess = cat(2, matSuccess, matSuccess, matSuccess, matSuccess, matSuccess);
 
 
 tasksobsfeats = cat(2, obsTasksStruct, obsTasksStruct, obsTasksStruct, obsTasksStruct, obsTasksStruct);
-
+ 
 tasksobsperf = cat(3, matFail, matSuccess);
 
-taskspredfeats = repelem(obsTasks(2:end, :), 50, 1);
+taskspredfeats = repelem(obsTasks(2:end, :), 51, 1);
 
 trustpred = [Trusts(:, 1); Trusts(:, 2); Trusts(:, 3); Trusts(:, 4); Trusts(:, 5)];
 
 tasksobsids(:,:,1) = cat(2, matTasks, matTasks, matTasks, matTasks, matTasks);
 
-taskpredids = repelem([1 2 3 4 5]', 50, 1);
+taskpredids = repelem([1 2 3 4 5]', 51, 1);
 
 taskpredtrust = trustpred;
 
-matTaskPredIDs = repelem([1 2 3 4 5], 50, 1);
+matTaskPredIDs = repelem([1 2 3 4 5], 51, 1);
 
 
 %% Save...

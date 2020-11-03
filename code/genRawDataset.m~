@@ -3,13 +3,13 @@ clear all; close all; clc;
 
 %% Generate new fixed or random task orders
 
-FixedOrRandom = true; %false;
+FixedOrRandom = false; %false;
 
 if FixedOrRandom
     load('Randomizers.mat');
 else
     % Randomizer
-    randomizer = randperm(50);
+    randomizer = randperm(49);
 
     % Vector that originates the performances
 
@@ -132,7 +132,7 @@ matTaskPredIDs = repelem([1 2 3 4 5], 50, 1);
 %% Save...
 
 
-saving = true
+saving = true;
 
 if saving
     save(...
@@ -144,7 +144,8 @@ if saving
                                                  'tasksobsids',...
                                                  'taskpredids',...
                                                'taskpredtrust',...
-                                                   'matTasks',...
+                                                    'matTasks',...
+                                               'matTaskPredIDs'...
         )
 end    
     

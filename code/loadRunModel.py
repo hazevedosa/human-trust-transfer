@@ -608,13 +608,13 @@ def computePCAFeatures(wordfeatures):
 def getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=None, pval=0.1, nfolds=10):
     tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, tasks_obs, tasks_pred, labels = dataset
 
-    obsseqlen = 50  # length of observation sequence
+    obsseqlen = 51  # length of observation sequence
     predseqlen = 5  # length of prediction sequence
 
     # tasks_obs -- matrix of tasks that were observed (32, 2)
     # tasks_pred -- matrix of tasks that were predicted (32, 3)
     pretasks_pred = tasks_pred # matrix of tasks that were predicted (32, 3)
-    nparts = 50 # number of participants?????????
+    nparts = 51 # number of participants?????????
 
 
     ntotalpred = trustpred.shape[0] # number of total predictions = 50
@@ -1019,7 +1019,7 @@ def main(
         learning_rate = 1e-1
         usepriormean = usepriormean
 
-        obsseqlen = 50
+        obsseqlen = 51
 
         phiinit = 1.0
         weight_decay = 0.01 #0.01
@@ -1099,7 +1099,7 @@ def main(
             #optimizer = torch.optim.LBFGS(model.parameters(), lr=learning_rate)
             counter = 0
 
-            # torch.save(model, os.path.join(modeldir, model.modelname + ".pth"))
+            torch.save(model, os.path.join(modeldir, model.modelname + ".pth"))
             restartopt = False
             t = 1
             #l2comp = nn.L2Loss()
@@ -1112,8 +1112,7 @@ def main(
                     predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
                     predtrust = torch.squeeze(predtrust)
 
-                    print(predtrust)
-                    stop()
+                    # print(predtrust)
 
                     # logloss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0)) # / 2*torch.exp(obsnoise))
                     loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
@@ -1208,48 +1207,47 @@ def main(
     model = torch.load(os.path.join(modeldir,  modelname + "_" + str(excludeid) + ".pth"))
 
 
+    # read the observed tasks
+    inptasksobs_azv = genfromtxt('inptasksobs.csv', delimiter=',')
+    inptasksobs_azv = torch.tensor(inptasksobs_azv)
+    inptasksobs_azv = torch.unsqueeze(inptasksobs_azv, 1)
+    inptasksobs_azv = inptasksobs_azv.type(torch.FloatTensor)
 
-    # # read the observed tasks
-    # inptasksobs_azv = genfromtxt('inptasksobs.csv', delimiter=',')
-    # inptasksobs_azv = torch.tensor(inptasksobs_azv)
-    # inptasksobs_azv = torch.unsqueeze(inptasksobs_azv, 1)
-    # inptasksobs_azv = inptasksobs_azv.type(torch.FloatTensor)
 
-
-    # # read the observed tasks performances
-    # inptasksperf_azv = genfromtxt('inptasksperf.csv', delimiter=',')
-    # inptasksperf_azv = torch.tensor(inptasksperf_azv)
-    # inptasksperf_azv = torch.unsqueeze(inptasksperf_azv, 1)
-    # inptasksperf_azv = inptasksperf_azv.type(torch.FloatTensor)
+    # read the observed tasks performances
+    inptasksperf_azv = genfromtxt('inptasksperf.csv', delimiter=',')
+    inptasksperf_azv = torch.tensor(inptasksperf_azv)
+    inptasksperf_azv = torch.unsqueeze(inptasksperf_azv, 1)
+    inptasksperf_azv = inptasksperf_azv.type(torch.FloatTensor)
 
     
-    # # the number of observed tasks goes here... but if only 1 is desired, its better to hack the model and hardcode num_obs_tasks = 1
-    # num_obs_tasks = inptasksperf_azv.shape[0]
+    # the number of observed tasks goes here... but if only 1 is desired, its better to hack the model and hardcode num_obs_tasks = 1
+    num_obs_tasks = inptasksperf_azv.shape[0]
 
 
-    # # read the observed tasks performances
-    # inptaskspred_azv = genfromtxt('inptaskspred.csv', delimiter=',')
-    # inptaskspred_azv = torch.tensor(inptaskspred_azv)
-    # inptaskspred_azv = torch.unsqueeze(inptaskspred_azv, 0)
-    # inptaskspred_azv = inptaskspred_azv.type(torch.FloatTensor)
+    # read the observed tasks performances
+    inptaskspred_azv = genfromtxt('inptaskspred.csv', delimiter=',')
+    inptaskspred_azv = torch.tensor(inptaskspred_azv)
+    inptaskspred_azv = torch.unsqueeze(inptaskspred_azv, 0)
+    inptaskspred_azv = inptaskspred_azv.type(torch.FloatTensor)
+
+    inptasksobs_azv = inptasksobs_azv.cuda()
+    inptasksperf_azv = inptasksperf_azv.cuda()
+    inptaskspred_azv = inptaskspred_azv.cuda()
 
 
-    # inptasksobs_azv = inptaskspred_azv
-    # inptasksperf_azv = np.zeros((1, 1, 2))
-    # inptasksperf_azv[0, 0, 0] = 1
-
-    # num_obs_tasks = 1
-
-    # print(inptasksobs_azv)
-    # print(inptasksperf_azv)
-    # print(inptaskspred_azv)
+    # print(type(inptasksobs_azv))
+    # print(type(inptasksperf_azv))
+    # print(type(inptaskspred_azv))
 
     # make predictions using trained model and compute metrics
-    # predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, num_obs_tasks))
+    predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0]))
+
+    print("predtrust_test", predtrust_test)
+
+
 
     predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
-
-    print(predtrust_test)
 
     res = np.zeros((predtrust_test.shape[0], 2))
     res[:, 0] = predtrust_test.cpu().data[:]
@@ -1302,8 +1300,8 @@ if __name__ == "__main__":
 
     allresults = []
     print(start, end)
-    # for excludeid in range(start, end):
-    for excludeid in range(1):    
+    for excludeid in range(start, end):
+    # for excludeid in range(1):
         print("Test id:", excludeid)
         result = main(
             dom=dom,
