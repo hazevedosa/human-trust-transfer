@@ -663,8 +663,19 @@ class GPTrustTransfer_Mod(torch.nn.Module):
             #print(A)
             # A = np.random.randn(inpsize,taskrepsize) #np.ones((taskrepsize,inpsize))
 
-        self.A = Parameter(dtype(np.array(A)))
-        self.reg_const = Parameter(dtype(np.eye(1)))
+
+        # use the matrix projection that Harold Soh had used?
+        self.useProjection = False
+
+        if self.useProjection:
+            self.A = Parameter(dtype(np.array(A)))
+        else:
+            self.A = dtype(np.eye(taskrepsize,inpsize))
+
+
+
+        # self.reg_const = Parameter(dtype(np.eye(1)))
+        self.reg_const = Parameter(dtype(np.eye(1)), requires_grad=False)
 
         # self.A = Variable(dtype(np.array(A)), requires_grad=False)
         # self.s = Parameter(dtype(np.eye(1)))
@@ -701,8 +712,6 @@ class GPTrustTransfer_Mod(torch.nn.Module):
         if self.kerneltype == self.FAKERNEL:
             self.priorsucc = Parameter(dtype(np.random.randn(1, taskrepsize))) * priorinit
             self.priorfail = Parameter(dtype(np.random.randn(1, taskrepsize))) * priorinit
-
-
         else:
             self.priorsucc = Parameter(dtype(np.random.randn(1, inpsize))) * priorinit
             self.priorfail = Parameter(dtype(np.random.randn(1, inpsize))) * priorinit
@@ -726,8 +735,6 @@ class GPTrustTransfer_Mod(torch.nn.Module):
 
         
     def getPriorMean(self,x):
-
-
         if self.usepriormean:
             return torch.dot(self.Ay[0], x[0]) + self.by
         elif self.usepriorpoints:
@@ -753,7 +760,6 @@ class GPTrustTransfer_Mod(torch.nn.Module):
         Alp = self.A
         if self.useAlimit:
             Alp = self.limiter(self.A) * self.Alimit
-
 
 
         for i in range(N):
@@ -1078,11 +1084,6 @@ class GPTrustTransfer_Mod(torch.nn.Module):
         else:
             print("Wrong!")
         return taskreps
-
-
-
-
-
 
 
 

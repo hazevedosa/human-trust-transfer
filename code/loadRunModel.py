@@ -423,16 +423,16 @@ def createDataset_fromMatFile(mat_file_name):
     tasksobsids = np.expand_dims(tasksobsids, axis=2)
     
     dataset = (
-               tasksobsfeats,   # (50, 250, 50) [numpy.ndarray]
-               tasksobsperf,    # (50, 250, 2)  [numpy.ndarray]
-               taskspredfeats,  # (250, 50)     [numpy.ndarray]
-               trustpred,       # (250,)        [numpy.ndarray]
-               tasksobsids,     # (50, 250, 1)  [numpy.ndarray]
-               taskpredids,     # (250, 1)      [numpy.ndarray]
-               taskpredtrust,   # (250, 1)      [numpy.ndarray]
-               matTasks,        # (50, 50)      [numpy.ndarray]
-               matTaskPredIDs,  # (50,  5)      [numpy.ndarray]
-               data_labels      # ???????????? [list]
+               tasksobsfeats,   # (51, 255, 50) [numpy.ndarray]
+               tasksobsperf,    # (51, 255, 2)  [numpy.ndarray]
+               taskspredfeats,  # (255, 50)     [numpy.ndarray]
+               trustpred,       # (255,)        [numpy.ndarray]
+               tasksobsids,     # (51, 255, 1)  [numpy.ndarray]
+               taskpredids,     # (255, 1)      [numpy.ndarray]
+               taskpredtrust,   # (255, 1)      [numpy.ndarray]
+               matTasks,        # (51, 51)      [numpy.ndarray]
+               matTaskPredIDs,  # (55,  5)      [numpy.ndarray]
+               data_labels      # ????????????  [list]
     )
 
     return dataset
@@ -1084,7 +1084,7 @@ def main(
     
     modeldir = "savedmodels"
     
-    runOptimization = False
+    runOptimization = True
 
     if runOptimization:
 
@@ -1206,48 +1206,51 @@ def main(
 
     model = torch.load(os.path.join(modeldir,  modelname + "_" + str(excludeid) + ".pth"))
 
+    azvTesting = False
 
-    # read the observed tasks
-    inptasksobs_azv = genfromtxt('inptasksobs.csv', delimiter=',')
-    inptasksobs_azv = torch.tensor(inptasksobs_azv)
-    inptasksobs_azv = torch.unsqueeze(inptasksobs_azv, 1)
-    inptasksobs_azv = inptasksobs_azv.type(torch.FloatTensor)
-
-
-    # read the observed tasks performances
-    inptasksperf_azv = genfromtxt('inptasksperf.csv', delimiter=',')
-    inptasksperf_azv = torch.tensor(inptasksperf_azv)
-    inptasksperf_azv = torch.unsqueeze(inptasksperf_azv, 1)
-    inptasksperf_azv = inptasksperf_azv.type(torch.FloatTensor)
-
-    
-    # the number of observed tasks goes here... but if only 1 is desired, its better to hack the model and hardcode num_obs_tasks = 1
-    num_obs_tasks = inptasksperf_azv.shape[0]
+    if azvTesting:
+        # read the observed tasks
+        inptasksobs_azv = genfromtxt('inptasksobs.csv', delimiter=',')
+        inptasksobs_azv = torch.tensor(inptasksobs_azv)
+        inptasksobs_azv = torch.unsqueeze(inptasksobs_azv, 1)
+        inptasksobs_azv = inptasksobs_azv.type(torch.FloatTensor)
 
 
-    # read the observed tasks performances
-    inptaskspred_azv = genfromtxt('inptaskspred.csv', delimiter=',')
-    inptaskspred_azv = torch.tensor(inptaskspred_azv)
-    inptaskspred_azv = torch.unsqueeze(inptaskspred_azv, 0)
-    inptaskspred_azv = inptaskspred_azv.type(torch.FloatTensor)
+        # read the observed tasks performances
+        inptasksperf_azv = genfromtxt('inptasksperf.csv', delimiter=',')
+        inptasksperf_azv = torch.tensor(inptasksperf_azv)
+        inptasksperf_azv = torch.unsqueeze(inptasksperf_azv, 1)
+        inptasksperf_azv = inptasksperf_azv.type(torch.FloatTensor)
 
-    inptasksobs_azv = inptasksobs_azv.cuda()
-    inptasksperf_azv = inptasksperf_azv.cuda()
-    inptaskspred_azv = inptaskspred_azv.cuda()
-
-
-    # print(type(inptasksobs_azv))
-    # print(type(inptasksperf_azv))
-    # print(type(inptaskspred_azv))
-
-    # make predictions using trained model and compute metrics
-    predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0]))
-
-    print("predtrust_test", predtrust_test)
+        
+        # the number of observed tasks goes here... but if only 1 is desired, its better to hack the model and hardcode num_obs_tasks = 1
+        num_obs_tasks = inptasksperf_azv.shape[0]
 
 
+        # read the observed tasks performances
+        inptaskspred_azv = genfromtxt('inptaskspred.csv', delimiter=',')
+        inptaskspred_azv = torch.tensor(inptaskspred_azv)
+        inptaskspred_azv = torch.unsqueeze(inptaskspred_azv, 0)
+        inptaskspred_azv = inptaskspred_azv.type(torch.FloatTensor)
 
-    predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
+        inptasksobs_azv = inptasksobs_azv.cuda()
+        inptasksperf_azv = inptasksperf_azv.cuda()
+        inptaskspred_azv = inptaskspred_azv.cuda()
+
+
+        # print(type(inptasksobs_azv))
+        # print(type(inptasksperf_azv))
+        # print(type(inptaskspred_azv))
+
+        # make predictions using trained model and compute metrics
+        predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0]))
+
+        print("predtrust_test", predtrust_test)
+        stop()
+
+
+    if not(azvTesting):
+        predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
 
     res = np.zeros((predtrust_test.shape[0], 2))
     res[:, 0] = predtrust_test.cpu().data[:]
