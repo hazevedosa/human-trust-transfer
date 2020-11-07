@@ -257,7 +257,7 @@ class GPTrustTransfer(torch.nn.Module):
 
 
     def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks):
-        N = inptasksobs.shape[1]     # N is probably the number of tasks for trust to be predicted...
+        N = inptasksobs.shape[1]     # N is the total number of predicitions in the dataset -- 192, or 255 in our case
         predtrust = Variable(dtype(np.zeros((N, 1))), requires_grad=False)
         errors = Variable(dtype(np.zeros((N, 1))), requires_grad=False)
 
