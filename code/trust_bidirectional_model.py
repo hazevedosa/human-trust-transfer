@@ -20,7 +20,9 @@ class BidirectionalTrustModel(torch.nn.Module):
                 inpsize, 
                 obsseqlen,
                 taskrepsize,
-                capabilityRepresentationSize
+                capabilityRepresentationSize,
+                tasksobsids, 
+                taskspredids
                 ):
         super(BidirectionalTrustModel, self).__init__()
 
@@ -33,7 +35,7 @@ class BidirectionalTrustModel(torch.nn.Module):
 
 
     # Forward Method (model process)
-    def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks):
+    def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks, tasksobsids, taskspredids):
 
         
 
@@ -42,6 +44,7 @@ class BidirectionalTrustModel(torch.nn.Module):
         trustPredictionsNumber      = 1                     # adequate to the dataset format... // (both)
 
         predictedTrust              = Variable(dtype(np.zeros((observationSequencesNumber, trustPredictionsNumber))), requires_grad=False) # (255, 1) for our dataset // (both)
+
 
 
         # for each (of the 255) observations sequence prior to trust predictions
@@ -54,14 +57,17 @@ class BidirectionalTrustModel(torch.nn.Module):
             ## Capabilities estimation loop
             # checks each task on the observation sequence
             for j in range(tasksPerObservationSequence):
-                self.capabilityUpdate(inptasksobs[j,i,:], inptasksperf[j,i,:])
+
+                # print(tasksobsids[j,i,:])
+
+                self.capabilityUpdate(inptasksobs[j,i,:], inptasksperf[j,i,:], tasksobsids[j,i,0])
 
 
             ## Trust computation loop
             # computes trust for each input task... But in our dataset we consider only 1
             for j in range(trustPredictionsNumber):
                 # predictedTrust[i, j] = self.computeTrust(inptaskspred[i, j])
-                predictedTrust[i, j] = self.computeTrust(inptaskspred[i])
+                predictedTrust[i, j] = self.computeTrust(taskspredids[i, 0])
 
             obsTrust = predictedTrust
 
@@ -69,9 +75,11 @@ class BidirectionalTrustModel(torch.nn.Module):
 
 
     # Auxiliary Methods
-    def capabilityUpdate(self, observedTask, observedTaskPerformance):
+    def capabilityUpdate(self, observedTask, observedTaskPerformance, observedTaskID):
 
-        observedCapability = self.requirementTransform(observedTask)
+        # print(observedTaskID)
+
+        observedCapability = self.requirementTransform(observedTaskID)
         taskIsNonZero, taskSuccess = self.getSuccessOrFailBools(observedTaskPerformance)
 
         if taskIsNonZero:
@@ -85,10 +93,16 @@ class BidirectionalTrustModel(torch.nn.Module):
                         self.capabilityMean[i] = observedCapability[i]
         return
 
-    def requirementTransform(self, observedTask):
+    def requirementTransform(self, observedTaskID):
 
+        seed = 0
+        np.random.seed(seed)
 
-        observedCapability = dtype(np.random.rand( self.capabilityRepresentationSize ))
+        obsMatrix = np.zeros(( self.capabilityRepresentationSize, 6 ))
+        obsMatrix[:, 1:6] = np.random.rand( self.capabilityRepresentationSize, 5 )
+        obsMatrix = dtype( obsMatrix )
+
+        observedCapability = torch.squeeze(obsMatrix[:, observedTaskID])
 
         return observedCapability
     
@@ -111,9 +125,9 @@ class BidirectionalTrustModel(torch.nn.Module):
 
         return taskIsNonZero, taskSuccess
     
-    def computeTrust(self, inptaskspred):
+    def computeTrust(self, inptaskspredID):
 
-        requiredCapability = self.requirementTransform(inptaskspred)
+        requiredCapability = self.requirementTransform(inptaskspredID)
 
         stepIndicator = 1
 
@@ -168,11 +182,17 @@ if __name__ == "__main__":
     mat_file_name = 'RawDataset.mat'
     dataset = createDataset_fromMatFile(mat_file_name)
 
+
     TestModel = BidirectionalTrustModel("testName",
                                         dataset[0].shape[2],
                                         dataset[0].shape[0],
                                         dataset[0].shape[2],
-                                        2)
+                                        3,
+                                        dataset[4],
+                                        dataset[5])
 
 
-    result = TestModel(dataset[0], dataset[1], dataset[2], dataset[0].shape[0])
+
+    result = TestModel(dataset[0], dataset[1], dataset[2], dataset[0].shape[0], dataset[4], dataset[5])
+
+    print(result)
