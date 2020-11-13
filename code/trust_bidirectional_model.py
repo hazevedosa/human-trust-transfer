@@ -29,16 +29,19 @@ class BidirectionalTrustModel(torch.nn.Module):
         self.capabilityMean = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False) # initialized as zeros
 
         self.trustPropensity = Parameter(dtype(np.eye(1))) # parameter to be optimized
+        self.counter = 0
 
 
     # Forward Method (model process)
     def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks):
 
-        tasksPerObservationSequence = inptasksobs.shape[0]  # 51 for our dataset
-        observationSequencesNumber  = inptasksobs.shape[1]  # 255 for our dataset
-        trustPredictionsNumber      = 1                     # adequate to the dataset format...
+        
 
-        predictedTrust              = Variable(dtype(np.zeros((observationSequencesNumber, trustPredictionsNumber))), requires_grad=False) # (255, 1) for our dataset
+        tasksPerObservationSequence = inptasksobs.shape[0]  # 51 for our dataset // 2 for Soh's
+        observationSequencesNumber  = inptasksobs.shape[1]  # 255 for our dataset // 192 or 186 for Soh's
+        trustPredictionsNumber      = 1                     # adequate to the dataset format... // (both)
+
+        predictedTrust              = Variable(dtype(np.zeros((observationSequencesNumber, trustPredictionsNumber))), requires_grad=False) # (255, 1) for our dataset // (both)
 
 
         # for each (of the 255) observations sequence prior to trust predictions
@@ -83,6 +86,7 @@ class BidirectionalTrustModel(torch.nn.Module):
         return
 
     def requirementTransform(self, observedTask):
+
 
         observedCapability = dtype(np.random.rand( self.capabilityRepresentationSize ))
 

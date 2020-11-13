@@ -42,8 +42,8 @@ dtype = torch.FloatTensor
 if usecuda:
     dtype = torch.cuda.FloatTensor
 
-# include_prepreds = True             # THIS might change some stuff......................................
-include_prepreds = False
+include_prepreds = True             # THIS might change some stuff......................................
+# include_prepreds = False
 
 
 npcafeats = 4
@@ -277,131 +277,131 @@ def getInputRep(taskid, nfeats, reptype="1hot", feats=None):
 
 
 # transforms raw data into dataset usable by our models
-# def createDataset(data, reptype, allfeatures):
-#     # create dataset suitable for model
-#     nperf = 2  # number of performance outcomes (e.g., 2 - success, failure)
-#     obsseqlen = 2  # length of observation sequence
-#     predseqlen = 3  # length of prediction sequence
+def createDataset(data, reptype, allfeatures):
+    # create dataset suitable for model
+    nperf = 2  # number of performance outcomes (e.g., 2 - success, failure)
+    obsseqlen = 2  # length of observation sequence
+    predseqlen = 3  # length of prediction sequence
 
-#     tasks_obs_perf = data["tasks_obs_perf"]
-#     tasks_obs = data["tasks_obs"]
-#     tasks_pred = data["tasks_pred"]
-#     trust_scores = data["trust_scores"]
-#     pretasks_pred = data["pretasks_pred"]
-#     pretrust_scores = data["pretrust_scores"]
-#     nparts = data["nparts"]
+    tasks_obs_perf = data["tasks_obs_perf"]
+    tasks_obs = data["tasks_obs"]
+    tasks_pred = data["tasks_pred"]
+    trust_scores = data["trust_scores"]
+    pretasks_pred = data["pretasks_pred"]
+    pretrust_scores = data["pretrust_scores"]
+    nparts = data["nparts"]
 
-#     if reptype == "1hot":
-#         nfeats = 13
-#     elif reptype == "taskid":
-#         nfeats = 1
-#     elif reptype == "wordfeat":
-#         taskfeatures = allfeatures["wordfeat"]
-#         nfeats = taskfeatures.shape[1]
-#     elif reptype == "tsne":
-#         nfeats = 3
-#         taskfeatures = allfeatures["tsne"]
-#     elif reptype == "pca":
-#         nfeats = npcafeats
-#         taskfeatures = allfeatures["pca"]
-#     else:
-#         raise ValueError("no such reptype")
+    if reptype == "1hot":
+        nfeats = 13
+    elif reptype == "taskid":
+        nfeats = 1
+    elif reptype == "wordfeat":
+        taskfeatures = allfeatures["wordfeat"]
+        nfeats = taskfeatures.shape[1]
+    elif reptype == "tsne":
+        nfeats = 3
+        taskfeatures = allfeatures["tsne"]
+    elif reptype == "pca":
+        nfeats = npcafeats
+        taskfeatures = allfeatures["pca"]
+    else:
+        raise ValueError("no such reptype")
     
-#     ntasks = taskfeatures.shape[0]
-#     print("num features:", nfeats)
+    ntasks = taskfeatures.shape[0]
+    print("num features:", nfeats)
 
 
-#     # create 1-hot representation for tasks observed
-#     N = nparts
-#     tasksobsfeats = np.zeros((obsseqlen, nparts, nfeats))
-#     tasksobsids = np.zeros((obsseqlen, nparts, 1))
+    # create 1-hot representation for tasks observed
+    N = nparts
+    tasksobsfeats = np.zeros((obsseqlen, nparts, nfeats))
+    tasksobsids = np.zeros((obsseqlen, nparts, 1))
 
-#     for i in range(N):
-#         for t in range(obsseqlen):
-#             tasksobsids[t, i, :] = tasks_obs[i, t]
-#             tasksobsfeats[t, i, :] = getInputRep(tasks_obs[i, t], nfeats, reptype=reptype, feats=taskfeatures)
+    for i in range(N):
+        for t in range(obsseqlen):
+            tasksobsids[t, i, :] = tasks_obs[i, t]
+            tasksobsfeats[t, i, :] = getInputRep(tasks_obs[i, t], nfeats, reptype=reptype, feats=taskfeatures)
 
-#     tasksobsfeats = np.tile(tasksobsfeats, [1, predseqlen, 1])
-#     tasksobsids = np.tile(tasksobsids, [1, predseqlen, 1])
+    tasksobsfeats = np.tile(tasksobsfeats, [1, predseqlen, 1])
+    tasksobsids = np.tile(tasksobsids, [1, predseqlen, 1])
 
-#     tasksobsperf = np.zeros((obsseqlen, nparts, nperf))
+    tasksobsperf = np.zeros((obsseqlen, nparts, nperf))
 
-#     for i in range(N):
-#         for t in range(obsseqlen):
-#             tasksobsperf[t, i, tasks_obs_perf[i, t]] = 1
-#     tasksobsperf = np.tile(tasksobsperf, [1, predseqlen, 1])
-
-
-#     # create 1-hot representation for tasks to predict
-#     ntotalpred = int(np.prod(tasks_pred.shape))
-#     tasks_pred_T = tasks_pred.transpose().reshape([ntotalpred, 1])
-#     taskspredfeats = np.zeros((ntotalpred, nfeats))
-#     for t in range(ntotalpred):
-#         taskspredfeats[t, :] = getInputRep(tasks_pred_T[t][0], nfeats, reptype=reptype, feats=taskfeatures)
-
-#     trust_scores_T = trust_scores.transpose().reshape([ntotalpred, 1])
-#     trustpred = np.zeros(ntotalpred)
-#     for t in range(ntotalpred):
-#         trustpred[t] = trust_scores_T[t][0]
-
-#     taskpredids = tasks_pred_T
-#     taskpredtrust = trust_scores_T
+    for i in range(N):
+        for t in range(obsseqlen):
+            tasksobsperf[t, i, tasks_obs_perf[i, t]] = 1
+    tasksobsperf = np.tile(tasksobsperf, [1, predseqlen, 1])
 
 
-#     if include_prepreds:
-#         pretasksobsids = np.zeros((obsseqlen, N, 1))
-#         pretasksobsfeats = np.zeros((obsseqlen, N, nfeats))
+    # create 1-hot representation for tasks to predict
+    ntotalpred = int(np.prod(tasks_pred.shape))
+    tasks_pred_T = tasks_pred.transpose().reshape([ntotalpred, 1])
+    taskspredfeats = np.zeros((ntotalpred, nfeats))
+    for t in range(ntotalpred):
+        taskspredfeats[t, :] = getInputRep(tasks_pred_T[t][0], nfeats, reptype=reptype, feats=taskfeatures)
 
-#         pretasksobsids = np.tile(pretasksobsids, [1, predseqlen, 1])
-#         pretasksobsfeats = np.tile(pretasksobsfeats, [1, predseqlen, 1])
+    trust_scores_T = trust_scores.transpose().reshape([ntotalpred, 1])
+    trustpred = np.zeros(ntotalpred)
+    for t in range(ntotalpred):
+        trustpred[t] = trust_scores_T[t][0]
 
-#         pretasksobsperf = np.zeros((obsseqlen, N, nperf))
-#         pretasksobsperf = np.tile(pretasksobsperf, [1, predseqlen, 1])
-
-#         # create 1-hot representation for pre-observation tasks to predict
-#         ntotalprepred = int(np.prod(pretasks_pred.shape))
-#         pretasks_pred_T = pretasks_pred.transpose().reshape([ntotalprepred, 1])
-#         pretaskspredfeats = np.zeros((ntotalprepred, nfeats))
-#         for t in range(ntotalprepred):
-#             pretaskspredfeats[t, :] = getInputRep(pretasks_pred_T[t][0], nfeats, reptype=reptype, feats=taskfeatures)
-
-#         pretrust_scores_T = pretrust_scores.transpose().reshape([ntotalprepred, 1])
-#         pretrustpred = np.zeros(ntotalprepred)
-#         for t in range(ntotalprepred):
-#             pretrustpred[t] = pretrust_scores_T[t][0]
-
-#         # create merged dataset
-#         tasksobsfeats = np.column_stack([pretasksobsfeats, tasksobsfeats])
-#         tasksobsperf = np.column_stack([pretasksobsperf, tasksobsperf])
-#         taskspredfeats = np.concatenate([pretaskspredfeats, taskspredfeats])
-#         trustpred = np.concatenate([pretrustpred, trustpred])
-
-#         tasksobsids = np.column_stack([pretasksobsids, tasksobsids])
-#         taskpredids = np.concatenate([pretasks_pred_T, tasks_pred_T])
-#         taskpredtrust = np.concatenate([pretrust_scores_T, trust_scores_T])
-
-#     # ok, I got too lazy to create a dict, using a tuple for now.
-
-#     # So, here we have 192 or 186 dimensions long datasets. Basically they have stacked up the 1st ratings, 
-#     # without observed tasks and 2nd ratings, with the observed tasks. The observed tasks in the first place are 0s --- there were no observed tasks at all...
-#     # the observed tasks in the second half are those named A and B in the original dataset.
-#     # I dont know why there is trustpred and taskpredtrust. they have basically the same data...
+    taskpredids = tasks_pred_T
+    taskpredtrust = trust_scores_T
 
 
-#     dataset = (
-#                tasksobsfeats,   # (2, 192, 50) or (2, 186, 50)  [numpy.ndarray]
-#                tasksobsperf,    # (2, 192, 2) or (2, 186, 2)    [numpy.ndarray]
-#                taskspredfeats,  # (192, 50) or (186, 50)        [numpy.ndarray]
-#                trustpred,       # (192,) or (186,)              [numpy.ndarray]
-#                tasksobsids,     # (2, 192, 1) or (2, 186, 1)    [numpy.ndarray]
-#                taskpredids,     # (192, 1) or (186, 1)          [numpy.ndarray]
-#                taskpredtrust,   # (192, 1) or (186, 1)          [numpy.ndarray]
-#                data["labels"]   # ['0-0', 'A-5', 'A-3', 'A-6', 'A-1', 'A-4', 'A-2', 'B-4', 'B-2', 'B-5', 'B-1', 'B-6', 'B-3'] for household [list]
-#               )
+    if include_prepreds:
+        pretasksobsids = np.zeros((obsseqlen, N, 1))
+        pretasksobsfeats = np.zeros((obsseqlen, N, nfeats))
+
+        pretasksobsids = np.tile(pretasksobsids, [1, predseqlen, 1])
+        pretasksobsfeats = np.tile(pretasksobsfeats, [1, predseqlen, 1])
+
+        pretasksobsperf = np.zeros((obsseqlen, N, nperf))
+        pretasksobsperf = np.tile(pretasksobsperf, [1, predseqlen, 1])
+
+        # create 1-hot representation for pre-observation tasks to predict
+        ntotalprepred = int(np.prod(pretasks_pred.shape))
+        pretasks_pred_T = pretasks_pred.transpose().reshape([ntotalprepred, 1])
+        pretaskspredfeats = np.zeros((ntotalprepred, nfeats))
+        for t in range(ntotalprepred):
+            pretaskspredfeats[t, :] = getInputRep(pretasks_pred_T[t][0], nfeats, reptype=reptype, feats=taskfeatures)
+
+        pretrust_scores_T = pretrust_scores.transpose().reshape([ntotalprepred, 1])
+        pretrustpred = np.zeros(ntotalprepred)
+        for t in range(ntotalprepred):
+            pretrustpred[t] = pretrust_scores_T[t][0]
+
+        # create merged dataset
+        tasksobsfeats = np.column_stack([pretasksobsfeats, tasksobsfeats])
+        tasksobsperf = np.column_stack([pretasksobsperf, tasksobsperf])
+        taskspredfeats = np.concatenate([pretaskspredfeats, taskspredfeats])
+        trustpred = np.concatenate([pretrustpred, trustpred])
+
+        tasksobsids = np.column_stack([pretasksobsids, tasksobsids])
+        taskpredids = np.concatenate([pretasks_pred_T, tasks_pred_T])
+        taskpredtrust = np.concatenate([pretrust_scores_T, trust_scores_T])
+
+    # ok, I got too lazy to create a dict, using a tuple for now.
+
+    # So, here we have 192 or 186 dimensions long datasets. Basically they have stacked up the 1st ratings, 
+    # without observed tasks and 2nd ratings, with the observed tasks. The observed tasks in the first place are 0s --- there were no observed tasks at all...
+    # the observed tasks in the second half are those named A and B in the original dataset.
+    # I dont know why there is trustpred and taskpredtrust. they have basically the same data...
+
+
+    dataset = (
+               tasksobsfeats,   # (2, 192, 50) or (2, 186, 50)  [numpy.ndarray]
+               tasksobsperf,    # (2, 192, 2) or (2, 186, 2)    [numpy.ndarray]
+               taskspredfeats,  # (192, 50) or (186, 50)        [numpy.ndarray]
+               trustpred,       # (192,) or (186,)              [numpy.ndarray]
+               tasksobsids,     # (2, 192, 1) or (2, 186, 1)    [numpy.ndarray]
+               taskpredids,     # (192, 1) or (186, 1)          [numpy.ndarray]
+               taskpredtrust,   # (192, 1) or (186, 1)          [numpy.ndarray]
+               data["labels"]   # ['0-0', 'A-5', 'A-3', 'A-6', 'A-1', 'A-4', 'A-2', 'B-4', 'B-2', 'B-5', 'B-1', 'B-6', 'B-3'] for household [list]
+              )
 
 
 
-#     return dataset
+    return dataset
 
 
 def createDataset_fromMatFile(mat_file_name):
@@ -453,155 +453,155 @@ def computePCAFeatures(wordfeatures):
 
 
 # pval is the validation proportion
-# def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfolds=10):
-#     tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, labels = dataset
+def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfolds=10):
+    tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, labels = dataset
 
-#     obsseqlen = 2  # length of observation sequence
-#     predseqlen = 3  # length of prediction sequence
+    obsseqlen = 2  # length of observation sequence
+    predseqlen = 3  # length of prediction sequence
 
-#     # tasks_obs_perf = data["tasks_obs_perf"]
-#     tasks_obs = data["tasks_obs"]   # matrix of tasks that were observed (32, 2)
-#     tasks_pred = data["tasks_pred"] # matrix of tasks that were predicted (32, 3)
-#     # trust_scores = data["trust_scores"]
-#     pretasks_pred = data["pretasks_pred"] # matrix of tasks that were predicted (32, 3)
-#     # pretrust_scores = data["pretrust_scores"]
-#     nparts = data["nparts"] # number of participants
+    # tasks_obs_perf = data["tasks_obs_perf"]
+    tasks_obs = data["tasks_obs"]   # matrix of tasks that were observed (32, 2)
+    tasks_pred = data["tasks_pred"] # matrix of tasks that were predicted (32, 3)
+    # trust_scores = data["trust_scores"]
+    pretasks_pred = data["pretasks_pred"] # matrix of tasks that were predicted (32, 3)
+    # pretrust_scores = data["pretrust_scores"]
+    nparts = data["nparts"] # number of participants
 
-#     ntotalpred = trustpred.shape[0]
-#     ntotalprepred = int(np.prod(pretasks_pred.shape))
-#     tasks_pred_T = tasks_pred.transpose().reshape([int(np.prod(tasks_pred.shape)), 1])
+    ntotalpred = trustpred.shape[0]
+    ntotalprepred = int(np.prod(pretasks_pred.shape))
+    tasks_pred_T = tasks_pred.transpose().reshape([int(np.prod(tasks_pred.shape)), 1])
 
-#     # trust_scores_T = trust_scores.transpose().reshape([ntotalpred, 1])
-#     # pretrust_scores_T = pretrust_scores.transpose().reshape([ntotalprepred, 1])
-#     pretasks_pred_T = pretasks_pred.transpose().reshape([int(np.prod(pretasks_pred.shape)), 1])
+    # trust_scores_T = trust_scores.transpose().reshape([ntotalpred, 1])
+    # pretrust_scores_T = pretrust_scores.transpose().reshape([ntotalprepred, 1])
+    pretasks_pred_T = pretasks_pred.transpose().reshape([int(np.prod(pretasks_pred.shape)), 1])
 
-#     trainids = []
-#     testids = []
-#     valids = []
+    trainids = []
+    testids = []
+    valids = []
 
-#     if splittype == "random":
-#         # Random splits
-#         # split into test and train set
-#         ntrain = int(np.floor(0.9 * ntotalpred))
-#         rids = np.random.permutation(ntotalpred)
-#         trainids = rids[0:ntrain]
-#         testids = rids[ntrain + 1:]
+    if splittype == "random":
+        # Random splits
+        # split into test and train set
+        ntrain = int(np.floor(0.9 * ntotalpred))
+        rids = np.random.permutation(ntotalpred)
+        trainids = rids[0:ntrain]
+        testids = rids[ntrain + 1:]
 
-#         nval = int(np.floor(pval * ntrain))
-#         valids = trainids[0:nval]
-#         trainids = np.setdiff1d(trainids, valids)
+        nval = int(np.floor(pval * ntrain))
+        valids = trainids[0:nval]
+        trainids = np.setdiff1d(trainids, valids)
 
-#     elif splittype == "3participant":
+    elif splittype == "3participant":
         
-#         ntestparts = int(nparts/nfolds)
-#         partid = excludeid*ntestparts
-#         print("Num Test Participants: ", ntestparts)
-#         partids = [] #[partid, partid+1, partid+2]
+        ntestparts = int(nparts/nfolds)
+        partid = excludeid*ntestparts
+        print("Num Test Participants: ", ntestparts)
+        partids = [] #[partid, partid+1, partid+2]
         
-#         for i in range(ntestparts):
-#             partids += [partid + i]
+        for i in range(ntestparts):
+            partids += [partid + i]
         
-#         # ridx = np.random.permutation(nparts)
-#         # for i in range(ntestparts):
-#         #     partids += [ridx[i]]        
+        # ridx = np.random.permutation(nparts)
+        # for i in range(ntestparts):
+        #     partids += [ridx[i]]        
     
-#         if include_prepreds:
-#             sidx = 0
-#             eidx = predseqlen * 2
-#         else:
-#             sidx = 0
-#             eidx = predseqlen 
+        if include_prepreds:
+            sidx = 0
+            eidx = predseqlen * 2
+        else:
+            sidx = 0
+            eidx = predseqlen 
             
-#         for partid in partids:
-#             for i in range(sidx, eidx):
-#                 testids += [i * nparts + partid]
+        for partid in partids:
+            for i in range(sidx, eidx):
+                testids += [i * nparts + partid]
 
-#         trainids = np.setdiff1d(range(ntotalpred), testids)
+        trainids = np.setdiff1d(range(ntotalpred), testids)
 
-#         ntrain = len(trainids)
-#         nval = int(np.floor(pval * ntrain))
-#         arr = np.arange(ntrain)
-#         rids = np.random.permutation(arr)
-#         valids = trainids[rids[0:nval]]
-#         # print("valids", valids)
-#         trainids = np.setdiff1d(trainids, valids)
-#         # print(trainids)        
-#     elif splittype == "LOOtask":
-#         # note that task ids range from 1 to nparts-1
-#         # remove all participants who observed the task
+        ntrain = len(trainids)
+        nval = int(np.floor(pval * ntrain))
+        arr = np.arange(ntrain)
+        rids = np.random.permutation(arr)
+        valids = trainids[rids[0:nval]]
+        # print("valids", valids)
+        trainids = np.setdiff1d(trainids, valids)
+        # print(trainids)        
+    elif splittype == "LOOtask":
+        # note that task ids range from 1 to nparts-1
+        # remove all participants who observed the task
 
-#         taskid = excludeid
-#         print(labels[excludeid])
-#         partids = []
-#         testids = []
-#         for i in range(nparts):
-#             for t in range(obsseqlen):
-#                 if tasks_obs[i, t] == taskid:
-#                     partids += [i]
+        taskid = excludeid
+        print(labels[excludeid])
+        partids = []
+        testids = []
+        for i in range(nparts):
+            for t in range(obsseqlen):
+                if tasks_obs[i, t] == taskid:
+                    partids += [i]
 
-#         preshapesize = 0
-#         if include_prepreds:
-#             preshapesize = pretasks_pred_T.shape[0]
+        preshapesize = 0
+        if include_prepreds:
+            preshapesize = pretasks_pred_T.shape[0]
                     
-#         if include_prepreds:
-#             for partid in partids:
-#                 for i in range(predseqlen):
-#                     testids += [i * nparts + partid + preshapesize]
+        if include_prepreds:
+            for partid in partids:
+                for i in range(predseqlen):
+                    testids += [i * nparts + partid + preshapesize]
 
-#         # remove all training samples where the prediction (pre and post were the task)
-#         if include_prepreds:
-#             for i in range(pretasks_pred_T.shape[0]):
-#                 if pretasks_pred_T[i] == taskid:
-#                     testids += [i]
+        # remove all training samples where the prediction (pre and post were the task)
+        if include_prepreds:
+            for i in range(pretasks_pred_T.shape[0]):
+                if pretasks_pred_T[i] == taskid:
+                    testids += [i]
 
         
-#         for i in range(tasks_pred_T.shape[0]):
-#             if tasks_pred_T[i] == taskid:
-#                 testids += [preshapesize + i]  # adding the size of pretasks because we concatenate the vectors
+        for i in range(tasks_pred_T.shape[0]):
+            if tasks_pred_T[i] == taskid:
+                testids += [preshapesize + i]  # adding the size of pretasks because we concatenate the vectors
                     
         
-#         testids = np.sort(np.unique(testids))
-#         trainids = np.setdiff1d(range(ntotalpred), testids)
-#         ntrain = len(trainids)
-#         nval = int(np.floor(pval * ntrain))
-#         rids = np.random.permutation(ntrain)
-#         valids = trainids[rids[0:nval]]
+        testids = np.sort(np.unique(testids))
+        trainids = np.setdiff1d(range(ntotalpred), testids)
+        ntrain = len(trainids)
+        nval = int(np.floor(pval * ntrain))
+        rids = np.random.permutation(ntrain)
+        valids = trainids[rids[0:nval]]
         
         
-#         trainids = np.setdiff1d(trainids, valids)
+        trainids = np.setdiff1d(trainids, valids)
 
-#     tasksobsfeats_train = tasksobsfeats[:, trainids, :]
-#     tasksobsperf_train = tasksobsperf[:, trainids, :]
-#     taskspredfeats_train = taskspredfeats[trainids, :]
-#     trustpred_train = trustpred[trainids]
+    tasksobsfeats_train = tasksobsfeats[:, trainids, :]
+    tasksobsperf_train = tasksobsperf[:, trainids, :]
+    taskspredfeats_train = taskspredfeats[trainids, :]
+    trustpred_train = trustpred[trainids]
 
-#     tasksobsfeats_val = tasksobsfeats[:, valids, :]
-#     tasksobsperf_val = tasksobsperf[:, valids, :]
-#     taskspredfeats_val = taskspredfeats[valids, :]
-#     trustpred_val = trustpred[valids]
+    tasksobsfeats_val = tasksobsfeats[:, valids, :]
+    tasksobsperf_val = tasksobsperf[:, valids, :]
+    taskspredfeats_val = taskspredfeats[valids, :]
+    trustpred_val = trustpred[valids]
 
-#     tasksobsfeats_test = tasksobsfeats[:, testids, :]
-#     tasksobsperf_test = tasksobsperf[:, testids, :]
-#     taskspredfeats_test = taskspredfeats[testids, :]
-#     trustpred_test = trustpred[testids]
+    tasksobsfeats_test = tasksobsfeats[:, testids, :]
+    tasksobsperf_test = tasksobsperf[:, testids, :]
+    taskspredfeats_test = taskspredfeats[testids, :]
+    trustpred_test = trustpred[testids]
 
-#     expdata = {
-#         "tasksobsfeats_train": tasksobsfeats_train,
-#         "tasksobsperf_train": tasksobsperf_train,
-#         "taskspredfeats_train": taskspredfeats_train,
-#         "trustpred_train": trustpred_train,
-#         "tasksobsfeats_val": tasksobsfeats_val,
-#         "tasksobsperf_val": tasksobsperf_val,
-#         "taskspredfeats_val": taskspredfeats_val,
-#         "trustpred_val": trustpred_val,
-#         "tasksobsfeats_test": tasksobsfeats_test,
-#         "tasksobsperf_test": tasksobsperf_test,
-#         "taskspredfeats_test": taskspredfeats_test,
-#         "trustpred_test": trustpred_test,
-#         "labels": data["labels"]
-#     }
+    expdata = {
+        "tasksobsfeats_train": tasksobsfeats_train,
+        "tasksobsperf_train": tasksobsperf_train,
+        "taskspredfeats_train": taskspredfeats_train,
+        "trustpred_train": trustpred_train,
+        "tasksobsfeats_val": tasksobsfeats_val,
+        "tasksobsperf_val": tasksobsperf_val,
+        "taskspredfeats_val": taskspredfeats_val,
+        "trustpred_val": trustpred_val,
+        "tasksobsfeats_test": tasksobsfeats_test,
+        "tasksobsperf_test": tasksobsperf_test,
+        "taskspredfeats_test": taskspredfeats_test,
+        "trustpred_test": trustpred_test,
+        "labels": data["labels"]
+    }
 
-#     return expdata
+    return expdata
 
 
 
@@ -931,7 +931,7 @@ def main(
     print("Modelname: ", modelname)
     usepriormean, usepriorpoints = getGPParams(gpmode)
 
-    
+
     verbose = False
 
     torch.manual_seed(seed)  # set up our seed for reproducibility
@@ -962,15 +962,16 @@ def main(
 
 
     # create primary dataset
-    # dataset = createDataset(data, reptype, allfeatures)
+    dataset = createDataset(data, reptype, allfeatures)
 
-    mat_file_name = 'RawDataset.mat'
-    dataset = createDataset_fromMatFile(mat_file_name)
+
+    # mat_file_name = 'RawDataset.mat'
+    # dataset = createDataset_fromMatFile(mat_file_name)
 
 
     # create dataset splits
-    # expdata = getTrainTestValSplit(data, dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
-    expdata = getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
+    expdata = getTrainTestValSplit(data, dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
+    # expdata = getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
     
     nfeats = allfeatures[reptype].shape[1]
 
@@ -1205,6 +1206,8 @@ def main(
 
 
     model = torch.load(os.path.join(modeldir,  modelname + "_" + str(excludeid) + ".pth"))
+
+
 
     azvTesting = False
 

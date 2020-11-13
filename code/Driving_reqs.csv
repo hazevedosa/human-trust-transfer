@@ -1,0 +1,142 @@
+StartDate,EndDate,Status,IPAddress,Progress,Duration (in seconds),Finished,RecordedDate,ResponseId,RecipientLastName,RecipientFirstName,RecipientEmail,ExternalReference,LocationLatitude,LocationLongitude,DistributionChannel,UserLanguage,Q1_1,Q1_2,Q1_3,Q2_1,Q2_2,Q2_3,Q3_1,Q3_2,Q3_3,Q4_1,Q4_2,Q4_3,Q5_1,Q5_2,Q5_3,Q6_1,Q6_2,Q6_3,Q7_1,Q7_2,Q7_3,Q8_1,Q8_2,Q8_3,Q9_1,Q9_2,Q9_3,Q10_1,Q10_2,Q10_3,Q11_1,Q11_2,Q11_3,Q12_1,Q12_2,Q12_3
+Start Date,End Date,Response Type,IP Address,Progress,Duration (in seconds),Finished,Recorded Date,Response ID,Recipient Last Name,Recipient First Name,Recipient Email,External Data Reference,Location Latitude,Location Longitude,Distribution Channel,User Language,"Please rate the required capabilities for a person to execute the driving task illustrated in Figure C1.
+
+ 
+'To park the car forwards, on an empty lot, starting from an aligned position' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C1.
+
+ 
+'To park the car forwards, on an empty lot, starting from an aligned position' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C1.
+
+ 
+'To park the car forwards, on an empty lot, starting from an aligned position' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C2.
+
+ 
+'To park the car backwards, on an empty lot, starting from a misaligned position' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C2.
+
+ 
+'To park the car backwards, on an empty lot, starting from a misaligned position' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C2.
+
+ 
+'To park the car backwards, on an empty lot, starting from a misaligned position' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C3.
+
+ 
+'To park the car forwards, on an empty lot, starting from a misaligned position' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C3.
+
+ 
+'To park the car forwards, on an empty lot, starting from a misaligned position' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C3.
+
+ 
+'To park the car forwards, on an empty lot, starting from a misaligned position' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C4.
+
+ 
+'To park the car backwards, with cars and people around, starting from an aligned position' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C4.
+
+ 
+'To park the car backwards, with cars and people around, starting from an aligned position' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C4.
+
+ 
+'To park the car backwards, with cars and people around, starting from an aligned position' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C5.
+
+ 
+'To park the car backwards, with cars and people around, starting from a misaligned position' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C5.
+
+ 
+'To park the car backwards, with cars and people around, starting from a misaligned position' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C5.
+
+ 
+'To park the car backwards, with cars and people around, starting from a misaligned position' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C6.
+
+ 
+'To park the car forwards, with cars and people around, starting from a misaligned position' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C6.
+
+ 
+'To park the car forwards, with cars and people around, starting from a misaligned position' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure C6.
+
+ 
+'To park the car forwards, with cars and people around, starting from a misaligned position' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D1.
+
+ 
+'While navigating, merge onto a clear road' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D1.
+
+ 
+'While navigating, merge onto a clear road' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D1.
+
+ 
+'While navigating, merge onto a clear road' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D2.
+
+ 
+'While navigating, turn left on a clear T-junction' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D2.
+
+ 
+'While navigating, turn left on a clear T-junction' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D2.
+
+ 
+'While navigating, turn left on a clear T-junction' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D3.
+
+ 
+'While navigating, enter a clear roundabout' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D3.
+
+ 
+'While navigating, enter a clear roundabout' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D3.
+
+ 
+'While navigating, enter a clear roundabout' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D4.
+
+ 
+'While navigating, enter a roundabout with other moving cars' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D4.
+
+ 
+'While navigating, enter a roundabout with other moving cars' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D4.
+
+ 
+'While navigating, enter a roundabout with other moving cars' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D5.
+
+ 
+'While navigating, merge onto a road with other moving cars' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D5.
+
+ 
+'While navigating, merge onto a road with other moving cars' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D5.
+
+ 
+'While navigating, merge onto a road with other moving cars' - Physical capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D6.
+
+ 
+'While navigating, turn left on a T-junction with other moving cars' - Cognitive capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D6.
+
+ 
+'While navigating, turn left on a T-junction with other moving cars' - Sensory capabilities","Please rate the required capabilities for a person to execute the driving task illustrated in Figure D6.
+
+ 
+'While navigating, turn left on a T-junction with other moving cars' - Physical capabilities"
+"{""ImportId"":""startDate"",""timeZone"":""America/Denver""}","{""ImportId"":""endDate"",""timeZone"":""America/Denver""}","{""ImportId"":""status""}","{""ImportId"":""ipAddress""}","{""ImportId"":""progress""}","{""ImportId"":""duration""}","{""ImportId"":""finished""}","{""ImportId"":""recordedDate"",""timeZone"":""America/Denver""}","{""ImportId"":""_recordId""}","{""ImportId"":""recipientLastName""}","{""ImportId"":""recipientFirstName""}","{""ImportId"":""recipientEmail""}","{""ImportId"":""externalDataReference""}","{""ImportId"":""locationLatitude""}","{""ImportId"":""locationLongitude""}","{""ImportId"":""distributionChannel""}","{""ImportId"":""userLanguage""}","{""ImportId"":""QID1_1""}","{""ImportId"":""QID1_2""}","{""ImportId"":""QID1_3""}","{""ImportId"":""QID3_1""}","{""ImportId"":""QID3_2""}","{""ImportId"":""QID3_3""}","{""ImportId"":""QID5_1""}","{""ImportId"":""QID5_2""}","{""ImportId"":""QID5_3""}","{""ImportId"":""QID6_1""}","{""ImportId"":""QID6_2""}","{""ImportId"":""QID6_3""}","{""ImportId"":""QID7_1""}","{""ImportId"":""QID7_2""}","{""ImportId"":""QID7_3""}","{""ImportId"":""QID8_1""}","{""ImportId"":""QID8_2""}","{""ImportId"":""QID8_3""}","{""ImportId"":""QID9_1""}","{""ImportId"":""QID9_2""}","{""ImportId"":""QID9_3""}","{""ImportId"":""QID10_1""}","{""ImportId"":""QID10_2""}","{""ImportId"":""QID10_3""}","{""ImportId"":""QID11_1""}","{""ImportId"":""QID11_2""}","{""ImportId"":""QID11_3""}","{""ImportId"":""QID12_1""}","{""ImportId"":""QID12_2""}","{""ImportId"":""QID12_3""}","{""ImportId"":""QID13_1""}","{""ImportId"":""QID13_2""}","{""ImportId"":""QID13_3""}","{""ImportId"":""QID14_1""}","{""ImportId"":""QID14_2""}","{""ImportId"":""QID14_3""}"
+2020-11-08 20:29:44,2020-11-08 20:39:56,IP Address,73.144.155.22,100,611,True,2020-11-08 20:39:56,R_3HqqSt11XqSBmrt,,,,,42.306793212890625,-83.705902099609375,anonymous,EN,60,60,60,70,80,90,60,60,70,80,80,80,90,100,100,70,80,80,60,65,65,65,77,80,60,60,60,80,80,81,90,91,100,91,91,100
+2020-11-08 21:04:56,2020-11-08 21:08:24,IP Address,24.127.103.68,100,207,True,2020-11-08 21:08:24,R_pmm2kJ0uIJQy43n,,,,,42.306793212890625,-83.705902099609375,anonymous,EN,20,30,40,40,60,40,50,40,40,60,70,40,70,80,40,80,70,40,30,50,30,40,55,30,20,40,30,50,70,40,50,60,30,50,60,40
+2020-11-08 21:12:20,2020-11-08 21:18:32,IP Address,174.230.2.55,100,372,True,2020-11-08 21:18:32,R_3qpz9Ml7BuT9Fwe,,,,,42.4622039794921875,-83.3993988037109375,anonymous,EN,0,,,31,50,20,11,20,5,70,70,50,80,80,60,41,40,16,29,30,20,35,35,20,41,41,21,70,71,42,80,70,40,90,90,60
+2020-11-08 21:22:57,2020-11-08 21:26:35,IP Address,68.42.76.37,100,217,True,2020-11-08 21:26:35,R_DvNVUAihc2nlE3f,,,,,42.306793212890625,-83.705902099609375,anonymous,EN,,0,0,30,34,31,15,17,15,43,32,37,42,35,37,39,42,32,39,36,38,36,31,30,35,35,34,55,58,51,44,45,47,43,47,53
+2020-11-08 21:19:00,2020-11-08 21:28:44,IP Address,68.41.55.120,100,584,True,2020-11-08 21:28:44,R_3PYKXZrQAJ1787k,,,,,42.2324066162109375,-83.70169830322265625,anonymous,EN,0,,,20,30,20,10,20,,50,60,30,90,90,70,40,40,30,20,20,10,20,20,10,20,20,10,50,50,30,60,60,40,60,60,40
+2020-11-08 22:28:07,2020-11-08 22:32:50,IP Address,68.61.156.109,100,283,True,2020-11-08 22:32:51,R_3MDJy4TW7XD4HUW,,,,,42.2196044921875,-83.6045989990234375,anonymous,EN,17,13,14,56,73,32,32,22,27,68,74,67,78,81,60,55,48,25,39,50,20,41,32,28,41,31,40,54,55,34,52,68,40,67,76,33
+2020-11-09 02:40:11,2020-11-09 02:48:45,IP Address,177.89.129.201,100,513,True,2020-11-09 02:48:45,R_22F8aHt1ygQrX58,,,,,-5.8101043701171875,-35.2266998291015625,anonymous,EN,20,10,10,25,25,20,25,35,25,20,40,30,40,50,40,30,35,30,35,40,25,40,40,25,50,55,30,59,65,60,50,75,35,60,60,40
+2020-11-09 03:03:26,2020-11-09 03:10:59,IP Address,201.17.158.165,100,452,True,2020-11-09 03:10:59,R_3ho9Us3PCcXNkj0,,,,,-19.8993072509765625,-43.957000732421875,anonymous,EN,0,,,19,43,4,5,5,,10,10,,20,20,,5,5,,,,,,,,,,,2,2,,2,2,,5,5,
+2020-11-09 03:26:47,2020-11-09 03:33:43,IP Address,189.120.78.145,100,415,True,2020-11-09 03:33:43,R_22Eu5IDwqx1i23x,,,,,-23.6269989013671875,-46.6349945068359375,anonymous,EN,93,92,94,93,68,85,90,84,90,87,75,81,82,64,79,86,68,79,84,89,92,86,84,87,81,77,85,78,83,84,81,85,84,85,89,87
+2020-11-09 04:07:36,2020-11-09 04:15:06,IP Address,179.218.95.29,100,450,True,2020-11-09 04:15:06,R_1Ii1AQHw7U8owlp,,,,,-22.92010498046875,-43.3307037353515625,anonymous,EN,40,30,20,48,40,40,45,42,41,60,60,49,59,58,40,63,71,54,51,47,41,61,55,50,60,50,50,68,66,50,68,66,52,66,63,42
+2020-11-09 05:18:32,2020-11-09 05:25:25,IP Address,200.20.225.19,100,412,True,2020-11-09 05:25:25,R_1BY3JGTRBYC5Q1R,,,,,-22.92010498046875,-43.3307037353515625,anonymous,EN,10,15,1,30,40,5,20,20,1,25,50,1,40,50,1,20,20,3,10,30,2,15,25,1,15,25,1,20,32,1,40,60,2,30,40,1
+2020-11-09 06:01:57,2020-11-09 06:09:34,IP Address,177.25.215.13,100,456,True,2020-11-09 06:09:34,R_eqXmUI5qFAZ9yHT,,,,,-19.8993072509765625,-43.957000732421875,anonymous,EN,10,20,6,10,20,11,8,20,10,20,28,10,50,40,22,50,50,30,68,80,44,66,49,55,60,52,55,80,70,36,56,68,43,63,53,40
+2020-11-09 06:30:39,2020-11-09 06:35:19,IP Address,179.107.139.120,100,279,True,2020-11-09 06:35:19,R_1q3yojObjIVQ9r2,,,,,-22.519805908203125,-44.0789947509765625,anonymous,EN,60,60,60,69,62,63,55,42,63,61,63,57,70,73,62,71,82,77,49,59,35,34,45,47,56,53,83,82,87,89,85,83,87,83,85,93
+2020-11-09 08:58:58,2020-11-09 09:01:46,IP Address,68.36.237.23,100,167,True,2020-11-09 09:01:46,R_3EiO3jm27VOM4Eu,,,,,42.4080047607421875,-83.49340057373046875,anonymous,EN,100,100,100,97,91,87,100,100,100,100,100,100,78,86,80,91,81,66,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100
+2020-11-09 09:08:52,2020-11-09 09:12:46,IP Address,68.36.237.23,100,234,True,2020-11-09 09:12:47,R_1GVvcKSOvPzrzqH,,,,,42.4080047607421875,-83.49340057373046875,anonymous,EN,52,33,25,100,48,94,87,40,74,100,89,28,100,77,75,100,100,77,68,53,50,50,32,61,37,30,28,87,88,39,94,100,28,97,99,53
+2020-11-09 10:41:59,2020-11-09 10:44:24,IP Address,181.199.43.156,100,145,True,2020-11-09 10:44:25,R_vNOwFoIyPjBMZdD,,,,,-2.1663970947265625,-79.90110015869140625,anonymous,EN,60,90,90,92,100,93,79,92,92,79,100,100,100,100,100,100,100,100,70,81,92,90,100,100,80,90,90,100,100,100,100,100,100,100,100,100
+2020-11-09 10:39:44,2020-11-09 10:48:02,IP Address,177.25.218.125,100,497,True,2020-11-09 10:48:02,R_1IinHYgWGJtFXmA,,,,,-19.8993072509765625,-43.957000732421875,anonymous,EN,30,0,11,50,28,28,40,12,16,60,51,27,80,67,51,100,65,56,40,56,34,43,60,46,57,54,59,67,88,72,67,90,83,75,100,92
+2020-11-09 11:14:27,2020-11-09 11:17:05,IP Address,73.144.65.57,100,158,True,2020-11-09 11:17:05,R_1j95wyrPLfUaOET,,,,,42.306793212890625,-83.705902099609375,anonymous,EN,10,7,10,39,40,41,70,70,19,68,68,27,74,99,33,62,72,40,27,27,34,34,38,40,28,32,32,62,59,35,70,71,50,83,58,46
+2020-11-09 12:49:10,2020-11-09 12:54:30,IP Address,191.100.104.40,100,319,True,2020-11-09 12:54:30,R_xuxGqL17DRdsuyJ,,,,,-2.8820037841796875,-78.984100341796875,anonymous,EN,10,10,10,20,40,40,21,31,20,40,100,20,60,100,60,60,100,60,40,69,41,41,70,41,40,59,30,50,100,50,60,75,60,60,100,60
+2020-11-09 16:38:52,2020-11-09 16:45:59,IP Address,201.17.86.254,100,427,True,2020-11-09 16:45:59,R_3CH6eWrscIF5ZRG,,,,,-22.92010498046875,-43.3307037353515625,anonymous,EN,5,8,5,19,19,19,12,12,12,30,29,10,71,70,52,60,60,40,20,20,20,30,30,29,29,30,30,49,59,40,60,70,60,60,80,60
+2020-11-09 16:51:15,2020-11-09 17:27:24,IP Address,191.30.58.137,100,2168,True,2020-11-09 17:27:24,R_1jUHTCRvcmPmP0a,,,,,-19.8993072509765625,-43.957000732421875,anonymous,EN,10,10,10,40,40,40,35,35,35,50,50,50,60,60,60,70,70,70,50,50,50,60,60,60,60,60,60,75,75,75,70,70,70,80,80,80
+2020-11-09 18:03:33,2020-11-09 18:55:38,IP Address,68.42.76.37,100,3125,True,2020-11-09 18:55:38,R_1eLAHBfwcYyAd7A,,,,,42.306793212890625,-83.705902099609375,anonymous,EN,9,15,7,20,10,7,19,26,13,30,20,10,39,40,18,39,41,22,19,21,12,38,38,14,38,43,26,38,50,15,36,48,24,46,62,18
+2020-11-09 19:31:34,2020-11-09 19:39:11,IP Address,68.56.152.71,100,456,True,2020-11-09 19:39:11,R_2f20ku1vHzPSCCA,,,,,42.3695068359375,-83.476898193359375,anonymous,EN,47,47,48,70,71,48,54,56,50,60,61,51,81,82,55,74,75,56,50,50,48,64,63,52,76,78,51,89,90,52,72,70,55,87,84,53
+2020-11-10 04:10:53,2020-11-10 04:33:38,IP Address,201.17.88.197,100,1365,True,2020-11-10 04:33:38,R_2S2JqcNm4Odi8Vf,,,,,-22.92010498046875,-43.3307037353515625,anonymous,EN,5,15,3,15,20,10,10,15,5,20,30,8,35,40,10,25,30,10,15,20,7,15,20,8,15,21,7,30,36,12,40,47,18,40,50,20
+2020-11-10 04:48:48,2020-11-10 04:49:49,IP Address,191.116.109.204,100,60,True,2020-11-10 04:49:49,R_2amlArDKWUCOdT6,,,,,-33.4512939453125,-70.6652984619140625,anonymous,EN,68,,,72,,,,,,,,,,,64,,,,,,,,,,63,,,,,,,,,,,
+2020-11-10 06:28:34,2020-11-10 06:47:56,IP Address,177.158.213.73,100,1162,True,2020-11-10 06:47:56,R_TpUEM70lkuNNX9f,,,,,-12.8665008544921875,-38.4857940673828125,anonymous,EN,5,5,5,15,20,5,10,15,5,20,10,5,25,25,5,15,15,5,10,5,5,20,10,5,15,15,5,20,15,5,20,15,5,20,15,5
+2020-11-10 09:34:12,2020-11-10 09:40:54,IP Address,72.186.244.38,100,402,True,2020-11-10 09:40:54,R_BFJ6njVf1ZZRDY5,,,,,28.0117034912109375,-82.582000732421875,anonymous,EN,50,40,20,70,60,40,60,50,40,80,80,60,80,90,60,90,90,80,80,90,50,79,90,70,80,90,70,95,95,80,80,90,61,81,90,80
+2020-11-10 09:41:39,2020-11-10 09:51:56,IP Address,189.94.32.48,100,617,True,2020-11-10 09:51:56,R_1oEXDbeBYrenOT7,,,,,-22.92010498046875,-43.3307037353515625,anonymous,EN,60,60,60,80,79,80,62,61,63,89,89,88,95,95,94,95,96,96,72,74,77,70,71,72,95,95,95,100,100,100,72,73,72,100,100,100
+2020-11-10 10:10:49,2020-11-10 10:20:05,IP Address,201.17.84.12,100,555,True,2020-11-10 10:20:06,R_24IZ8GxCscjZIdB,,,,,-22.92010498046875,-43.3307037353515625,anonymous,EN,100,100,100,100,82,72,92,82,63,92,72,82,81,51,40,91,71,63,100,100,100,81,71,71,92,59,82,81,60,51,91,82,73,92,61,61
+2020-11-10 14:29:22,2020-11-10 14:37:26,IP Address,170.81.167.229,100,484,True,2020-11-10 14:37:27,R_cJhqVxaqrsjd8KB,,,,,-22.756103515625,-42.87030029296875,anonymous,EN,40,20,40,50,10,40,50,11,40,40,20,40,50,10,40,50,10,40,20,60,20,30,40,30,30,40,30,50,30,20,40,40,20,30,50,20
+2020-11-11 08:13:14,2020-11-11 08:15:38,IP Address,189.120.72.200,100,144,True,2020-11-11 08:15:38,R_3MEGbmoqj6s1LOi,,,,,-23.6269989013671875,-46.6349945068359375,anonymous,EN,1,1,50,75,76,49,50,48,50,71,72,49,83,83,50,82,80,47,82,81,48,80,79,51,71,69,50,71,70,50,85,85,55,88,87,53
