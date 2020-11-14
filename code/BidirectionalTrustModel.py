@@ -9,7 +9,15 @@ from numpy.linalg import norm
 
 import scipy.io as sio
 
+import pickle
+
+usecuda = True
+usecuda = usecuda and torch.cuda.is_available()
+
 dtype = torch.FloatTensor
+
+if usecuda:
+    dtype = torch.cuda.FloatTensor
 
 class BidirectionalTrustModel(torch.nn.Module):
 
@@ -30,9 +38,8 @@ class BidirectionalTrustModel(torch.nn.Module):
         self.capabilityRepresentationSize = capabilityRepresentationSize # how many capabilities are represented
         self.capabilityMean = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False) # initialized as zeros
 
-        self.trustPropensity = Parameter(dtype(np.eye(1))) # parameter to be optimized
-        self.counter = 0
-
+        self.betas = Parameter(dtype(20.0 * np.random.rand( capabilityRepresentationSize ))) # parameters to be optimized
+        self.zetas = Parameter(dtype(np.random.rand( capabilityRepresentationSize ))) # parameters to be optimized
 
     # Forward Method (model process)
     def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks, tasksobsids, taskspredids):
@@ -42,8 +49,8 @@ class BidirectionalTrustModel(torch.nn.Module):
         tasksPerObservationSequence = inptasksobs.shape[0]  # 51 for our dataset // 2 for Soh's
         observationSequencesNumber  = inptasksobs.shape[1]  # 255 for our dataset // 192 or 186 for Soh's
         trustPredictionsNumber      = 1                     # adequate to the dataset format... // (both)
-
-        predictedTrust              = Variable(dtype(np.zeros((observationSequencesNumber, trustPredictionsNumber))), requires_grad=False) # (255, 1) for our dataset // (both)
+        predictedTrust              = Variable(dtype(np.zeros((observationSequencesNumber, trustPredictionsNumber))), requires_grad=False) 
+                                                                                                      # (255, 1) for our dataset // (both)
 
 
 
@@ -57,9 +64,6 @@ class BidirectionalTrustModel(torch.nn.Module):
             ## Capabilities estimation loop
             # checks each task on the observation sequence
             for j in range(tasksPerObservationSequence):
-
-                # print(tasksobsids[j,i,:])
-
                 self.capabilityUpdate(inptasksobs[j,i,:], inptasksperf[j,i,:], tasksobsids[j,i,0])
 
 
@@ -69,15 +73,12 @@ class BidirectionalTrustModel(torch.nn.Module):
                 # predictedTrust[i, j] = self.computeTrust(inptaskspred[i, j])
                 predictedTrust[i, j] = self.computeTrust(taskspredids[i, 0])
 
-            obsTrust = predictedTrust
+            trust = predictedTrust
 
-        return obsTrust
-
+        return trust
 
     # Auxiliary Methods
     def capabilityUpdate(self, observedTask, observedTaskPerformance, observedTaskID):
-
-        # print(observedTaskID)
 
         observedCapability = self.requirementTransform(observedTaskID)
         taskIsNonZero, taskSuccess = self.getSuccessOrFailBools(observedTaskPerformance)
@@ -95,19 +96,15 @@ class BidirectionalTrustModel(torch.nn.Module):
 
     def requirementTransform(self, observedTaskID):
 
-        seed = 0
-        np.random.seed(seed)
+        capabilitiesMatrix = 0.01 * np.array(   [[0.0, 33.0, 50.0, 43.0, 56.0, 67.0, 62.0, 47.0, 50.0, 51.0, 64.0, 64.0, 68.0],
+                                                 [0.0, 33.0, 49.0, 39.0, 58.0, 67.0, 60.0, 54.0, 52.0, 52.0, 67.0, 69.0, 71.0],
+                                                 [0.0, 33.0, 42.0, 39.0, 44.0, 52.0, 49.0, 42.0, 45.0, 46.0, 52.0, 53.0, 56.0]]  )
 
-        obsMatrix = np.zeros(( self.capabilityRepresentationSize, 6 ))
-        obsMatrix[:, 1:6] = np.random.rand( self.capabilityRepresentationSize, 5 )
-        obsMatrix = dtype( obsMatrix )
-
-        observedCapability = torch.squeeze(obsMatrix[:, observedTaskID])
+        capabilitiesMatrix = dtype(capabilitiesMatrix)
+        observedCapability = torch.squeeze(capabilitiesMatrix[:, observedTaskID])
 
         return observedCapability
     
-
-
     def getSuccessOrFailBools(self, observedTaskPerformance):
         
         if not(observedTaskPerformance[0]) and not(observedTaskPerformance[1]):
@@ -129,70 +126,13 @@ class BidirectionalTrustModel(torch.nn.Module):
 
         requiredCapability = self.requirementTransform(inptaskspredID)
 
-        stepIndicator = 1
+        trust = 1.0
 
         for i in range(self.capabilityRepresentationSize):
-            if requiredCapability[i] > self.capabilityMean[i]:
-                stepIndicator = stepIndicator * 0
 
-        return stepIndicator * dtype(np.eye(1))
+            p_i = self.betas[i] * (requiredCapability[i] - self.capabilityMean[i])
+            d_i = ( 1 + torch.exp(p_i) ) ** ( -self.zetas[i] )
 
+            trust = trust * d_i
 
-
-
-# Non-class methods
-def createDataset_fromMatFile(mat_file_name):
-
-    mat_contents = sio.loadmat(mat_file_name)
-
-    tasksobsfeats   = mat_contents["tasksobsfeats"]
-    tasksobsperf    = mat_contents["tasksobsperf"]
-    taskspredfeats  = mat_contents["taskspredfeats"]
-    trustpred       = mat_contents["trustpred"]
-    tasksobsids     = mat_contents["tasksobsids"]
-    taskpredids     = mat_contents["taskpredids"]
-    taskpredtrust   = mat_contents["taskpredtrust"]
-    matTasks        = mat_contents["matTasks"]
-    matTaskPredIDs  = mat_contents["matTaskPredIDs"]
-    data_labels     = ['0-0', 'H-1', 'H-2', 'H-3', 'H-4', 'H-5']
-
-    trustpred = np.squeeze(trustpred)
-    tasksobsids = np.expand_dims(tasksobsids, axis=2)
-
-    dataset = (
-                tasksobsfeats,   # (51, 255, 50) [numpy.ndarray]
-                tasksobsperf,    # (51, 255, 2)  [numpy.ndarray]
-                taskspredfeats,  # (255, 50)     [numpy.ndarray]
-                trustpred,       # (255,)        [numpy.ndarray]
-                tasksobsids,     # (51, 255, 1)  [numpy.ndarray]
-                taskpredids,     # (255, 1)      [numpy.ndarray]
-                taskpredtrust,   # (255, 1)      [numpy.ndarray]
-                matTasks,        # (51, 51)      [numpy.ndarray]
-                matTaskPredIDs,  # (55,  5)      [numpy.ndarray]
-                data_labels      # ????????????  [list]
-    )
-
-    return dataset
-
-
-
-# Just for testing...
-if __name__ == "__main__":
-
-    mat_file_name = 'RawDataset.mat'
-    dataset = createDataset_fromMatFile(mat_file_name)
-
-
-    TestModel = BidirectionalTrustModel("testName",
-                                        dataset[0].shape[2],
-                                        dataset[0].shape[0],
-                                        dataset[0].shape[2],
-                                        3,
-                                        dataset[4],
-                                        dataset[5])
-
-
-
-    result = TestModel(dataset[0], dataset[1], dataset[2], dataset[0].shape[0], dataset[4], dataset[5])
-
-    print(result)
+        return dtype(trust)
