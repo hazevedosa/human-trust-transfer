@@ -27,8 +27,8 @@ C = cov(Long)
 
 CC = (Long - mu)' * (Long - mu)/371;
 
-% 
-% task = 12; % 1 to 12
+
+task = 12; % 1 to 12
 % 
 % M_task = [A(:, 3 * (task - 1) + 1), A(:, 3 * (task - 1) + 2), A(:, 3 * (task - 1) + 3)];
 % 
@@ -45,8 +45,8 @@ CC = (Long - mu)' * (Long - mu)/371;
 % grid
 % axis([0 100 0 100 0 100])
 % 
-% capab = 3; % 1-Cognitive; 2-Sensory; 3-Physical
-% 
-% col = 3 * (task - 1) + capab;
-% 
-% histogram(A(:, col), 10)
+capab = 3; % 1-Cognitive; 2-Sensory; 3-Physical
+
+col = 3 * (task - 1) + capab;
+
+histogram(A(:, col), 100)
