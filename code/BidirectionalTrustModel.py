@@ -134,10 +134,11 @@ class BidirectionalTrustModel(torch.nn.Module):
         for i in range(self.capabilityRepresentationSize):
 
             p_i = self.betas[i] * (requiredCapability[i] - self.capabilityMean[i])
-            d_i = ( 1 + torch.exp(p_i) ) ** ( -self.zetas[i] )
+            d_i = ( 1 + torch.exp(p_i) ) ** ( - self.zetas[i] * self.zetas[i] )
+            # d_i = ( 1 + torch.exp(p_i) ) ** ( - 1 )
 
             trust = trust * d_i
 
-        print(self.zetas)
+        # print(self.zetas)
 
         return dtype(trust)

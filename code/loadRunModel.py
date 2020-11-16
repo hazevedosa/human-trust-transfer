@@ -1176,7 +1176,6 @@ def main(
                     loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
                             torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
 
-                    
 
                     optimizer.zero_grad()
 
