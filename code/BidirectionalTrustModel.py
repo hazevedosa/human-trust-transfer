@@ -1,4 +1,4 @@
-# our imports
+# imports
 import torch
 from torch.autograd import Variable
 from torch import nn
@@ -28,12 +28,12 @@ class BidirectionalTrustModel(torch.nn.Module):
                 inpsize, 
                 obsseqlen,
                 taskrepsize,
-                capabilityRepresentationSize,
-                tasksobsids, 
-                taskspredids
+                capabilityRepresentationSize
                 ):
         super(BidirectionalTrustModel, self).__init__()
 
+
+        self.modelname = modelname
 
         self.capabilityRepresentationSize = capabilityRepresentationSize # how many capabilities are represented
         self.capabilityMean = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False) # initialized as zeros
@@ -73,7 +73,7 @@ class BidirectionalTrustModel(torch.nn.Module):
                 # predictedTrust[i, j] = self.computeTrust(inptaskspred[i, j])
                 predictedTrust[i, j] = self.computeTrust(taskspredids[i, 0])
 
-            trust = predictedTrust
+        trust = predictedTrust
 
         return trust
 
@@ -101,6 +101,9 @@ class BidirectionalTrustModel(torch.nn.Module):
                                                  [0.0, 33.0, 42.0, 39.0, 44.0, 52.0, 49.0, 42.0, 45.0, 46.0, 52.0, 53.0, 56.0]]  )
 
         capabilitiesMatrix = dtype(capabilitiesMatrix)
+
+        observedTaskID = int(observedTaskID)
+
         observedCapability = torch.squeeze(capabilitiesMatrix[:, observedTaskID])
 
         return observedCapability
@@ -134,5 +137,7 @@ class BidirectionalTrustModel(torch.nn.Module):
             d_i = ( 1 + torch.exp(p_i) ) ** ( -self.zetas[i] )
 
             trust = trust * d_i
+
+        print(self.zetas)
 
         return dtype(trust)

@@ -27,6 +27,7 @@ import sys
 import pickle
 
 from trustmodels import *
+from BidirectionalTrustModel import *
 
 
 #from matplotlib import cm
@@ -1167,6 +1168,21 @@ def initModel(modeltype, modelname, parameters):
                                perfrepsize=perfrepsize, numGRUlayers=numGRUlayers,
                                Zinit = Ainit
                                )
+    elif modeltype == "btm":
+        
+        inputsize = parameters["inputsize"]
+        taskrepsize = parameters["taskrepsize"]
+        obsseqlen = parameters["obsseqlen"]
+        capabilityRepresentationSize = 3
+
+
+        model = BidirectionalTrustModel(
+                                        modelname,
+                                        inputsize,
+                                        obsseqlen,
+                                        taskrepsize,
+                                        capabilityRepresentationSize,
+        )
     elif modeltype == "gp":
         inputsize = parameters["inputsize"]
         taskrepsize = parameters["taskrepsize"]

@@ -67,9 +67,7 @@ if __name__ == "__main__":
                                         dataset[0].shape[2],
                                         dataset[0].shape[0],
                                         dataset[0].shape[2],
-                                        3,
-                                        dataset[4],
-                                        dataset[5])
+                                        3)
 
     result = TestModel(dataset[0], dataset[1], dataset[2], dataset[0].shape[0], dataset[4], dataset[5])
     print(result)

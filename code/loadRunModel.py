@@ -32,6 +32,7 @@ import sys
 import pickle
 
 from trustmodels import *
+from BidirectionalTrustModel import *
 
 import matplotlib.pyplot as plt
 
@@ -570,34 +571,51 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
         
         trainids = np.setdiff1d(trainids, valids)
 
+
+
     tasksobsfeats_train = tasksobsfeats[:, trainids, :]
     tasksobsperf_train = tasksobsperf[:, trainids, :]
     taskspredfeats_train = taskspredfeats[trainids, :]
     trustpred_train = trustpred[trainids]
+    
+    tasksobsids_train = tasksobsids[:, trainids, :]
+    taskpredids_train = taskpredids[trainids, :]
 
     tasksobsfeats_val = tasksobsfeats[:, valids, :]
     tasksobsperf_val = tasksobsperf[:, valids, :]
     taskspredfeats_val = taskspredfeats[valids, :]
     trustpred_val = trustpred[valids]
 
+    tasksobsids_val = tasksobsids[:, valids, :]
+    taskpredids_val = taskpredids[valids, :]
+
     tasksobsfeats_test = tasksobsfeats[:, testids, :]
     tasksobsperf_test = tasksobsperf[:, testids, :]
     taskspredfeats_test = taskspredfeats[testids, :]
     trustpred_test = trustpred[testids]
+
+    tasksobsids_test = tasksobsids[:, testids, :]
+    taskpredids_test = taskpredids[testids, :]
 
     expdata = {
         "tasksobsfeats_train": tasksobsfeats_train,
         "tasksobsperf_train": tasksobsperf_train,
         "taskspredfeats_train": taskspredfeats_train,
         "trustpred_train": trustpred_train,
+        "tasksobsids_train": tasksobsids_train,
+        "taskpredids_train": taskpredids_train,
         "tasksobsfeats_val": tasksobsfeats_val,
         "tasksobsperf_val": tasksobsperf_val,
         "taskspredfeats_val": taskspredfeats_val,
         "trustpred_val": trustpred_val,
+        "tasksobsids_val": tasksobsids_val,
+        "taskpredids_val": taskpredids_val,
         "tasksobsfeats_test": tasksobsfeats_test,
         "tasksobsperf_test": tasksobsperf_test,
         "taskspredfeats_test": taskspredfeats_test,
         "trustpred_test": trustpred_test,
+        "tasksobsids_test": tasksobsids_test,
+        "taskpredids_test": taskpredids_test,
         "labels": data["labels"]
     }
 
@@ -725,31 +743,47 @@ def getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=None, pval=0.
     tasksobsperf_train = tasksobsperf[:, trainids, :]
     taskspredfeats_train = taskspredfeats[trainids, :]
     trustpred_train = trustpred[trainids]
+    
+    tasksobsids_train = tasksobsids[:, trainids, :]
+    taskpredids_train = taskpredids[trainids, :]
 
     tasksobsfeats_val = tasksobsfeats[:, valids, :]
     tasksobsperf_val = tasksobsperf[:, valids, :]
     taskspredfeats_val = taskspredfeats[valids, :]
     trustpred_val = trustpred[valids]
 
+    tasksobsids_val = tasksobsids[:, valids, :]
+    taskpredids_val = taskpredids[valids, :]
+
+
     tasksobsfeats_test = tasksobsfeats[:, testids, :]
     tasksobsperf_test = tasksobsperf[:, testids, :]
     taskspredfeats_test = taskspredfeats[testids, :]
     trustpred_test = trustpred[testids]
+
+    tasksobsids_test = tasksobsids[:, testids, :]
+    taskpredids_test = taskpredids[testids, :]
 
     expdata = {
         "tasksobsfeats_train": tasksobsfeats_train,
         "tasksobsperf_train": tasksobsperf_train,
         "taskspredfeats_train": taskspredfeats_train,
         "trustpred_train": trustpred_train,
+        "tasksobsids_train": tasksobsids_train,
+        "taskpredids_train": taskpredids_train,
         "tasksobsfeats_val": tasksobsfeats_val,
         "tasksobsperf_val": tasksobsperf_val,
         "taskspredfeats_val": taskspredfeats_val,
         "trustpred_val": trustpred_val,
+        "tasksobsids_val": tasksobsids_val,
+        "taskpredids_val": taskpredids_val,
         "tasksobsfeats_test": tasksobsfeats_test,
         "tasksobsperf_test": tasksobsperf_test,
         "taskspredfeats_test": taskspredfeats_test,
         "trustpred_test": trustpred_test,
-        "labels": labels
+        "tasksobsids_test": tasksobsids_test,
+        "taskpredids_test": taskpredids_test,
+        "labels": data["labels"]
     }
 
     return expdata
@@ -984,16 +1018,24 @@ def main(
     inptaskspred = Variable(dtype(expdata["taskspredfeats_train"]), requires_grad=False)
     outtrustpred = Variable(dtype(expdata["trustpred_train"]), requires_grad=False)
 
+    tasksobsids = Variable(dtype(expdata["tasksobsids_train"]), requires_grad=False)
+    taskspredids = Variable(dtype(expdata["taskpredids_train"]), requires_grad=False)
 
     inptasksobs_val = Variable(dtype(expdata["tasksobsfeats_val"]), requires_grad=False)
     inptasksperf_val = Variable(dtype(expdata["tasksobsperf_val"]), requires_grad=False)
     inptaskspred_val = Variable(dtype(expdata["taskspredfeats_val"]), requires_grad=False)
     outtrustpred_val = Variable(dtype(expdata["trustpred_val"]), requires_grad=False)
 
+    tasksobsids_val = Variable(dtype(expdata["tasksobsids_val"]), requires_grad=False)
+    taskspredids_val = Variable(dtype(expdata["taskpredids_val"]), requires_grad=False)
+
     inptasksobs_test = Variable(dtype(expdata["tasksobsfeats_test"]), requires_grad=False)
     inptasksperf_test = Variable(dtype(expdata["tasksobsperf_test"]), requires_grad=False)
     inptaskspred_test = Variable(dtype(expdata["taskspredfeats_test"]), requires_grad=False)
     outtrustpred_test = Variable(dtype(expdata["trustpred_test"]), requires_grad=False)
+
+    tasksobsids_test = Variable(dtype(expdata["tasksobsids_test"]), requires_grad=False)
+    taskspredids_test = Variable(dtype(expdata["taskpredids_test"]), requires_grad=False)
 
     learning_rate = 1e-3
 
@@ -1034,6 +1076,18 @@ def main(
             "verbose": verbose,
             "usepriormean":usepriormean,
             "usepriorpoints":usepriorpoints
+        }
+    elif modeltype == "btm":
+        
+        learning_rate = 1e-1
+        obsseqlen = 2
+        weight_decay = 0.01
+
+        modelparams = {
+            "inputsize": inptasksobs.shape[2],
+            "taskrepsize": taskrepsize,
+            "obsseqlen": obsseqlen,
+            "verbose": verbose,
         }
     elif modeltype == "neural":
         perfrepsize = taskrepsize
@@ -1110,7 +1164,10 @@ def main(
                 def closure():
                     N = inptaskspred.shape[0]
 
-                    predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
+                    if modeltype == "btm":
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids)
+                    else:
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
                     predtrust = torch.squeeze(predtrust)
 
                     # print(predtrust)
@@ -1135,20 +1192,31 @@ def main(
 
                 if t % reportperiod == 0:
                     # compute training loss
-                    predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
+                    if modeltype == "btm":
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids)
+                    else:
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
 
                     predtrust = torch.squeeze(predtrust)
                     loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
                             torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / inptaskspred.shape[0]
 
                     # compute validation loss
-                    predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0])
+                    if modeltype == "btm":
+                        predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0], tasksobsids_val, taskspredids_val)
+                    else:
+                        predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0])
                     predtrust_val = torch.squeeze(predtrust_val)
                     valloss = -(torch.dot(outtrustpred_val, torch.log(predtrust_val)) +
                                 torch.dot((1 - outtrustpred_val), torch.log(1.0 - predtrust_val))) / predtrust_val.shape[0]
 
                     # compute prediction loss
-                    predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
+                    if modeltype == "btm":
+                        predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], 
+                                                                                                            tasksobsids_test, taskspredids_test))
+                    else:
+                        predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
+                    
                     predloss = -(torch.dot(outtrustpred_test, torch.log(predtrust_test)) +
                                 torch.dot((1 - outtrustpred_test), torch.log(1.0 - predtrust_test))) / predtrust_test.shape[0]
 
@@ -1246,14 +1314,20 @@ def main(
         # print(type(inptaskspred_azv))
 
         # make predictions using trained model and compute metrics
-        predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0]))
+        if modeltype == "btm":
+            predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0], tasksobsids_azv, taskspredids_azv))
+        else:
+            predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0]))
 
         print("predtrust_test", predtrust_test)
         stop()
 
 
     if not(azvTesting):
-        predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
+        if modeltype == "btm":
+            predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], tasksobsids_test, taskspredids_test))
+        else:
+            predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
 
     res = np.zeros((predtrust_test.shape[0], 2))
     res[:, 0] = predtrust_test.cpu().data[:]
