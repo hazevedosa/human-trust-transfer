@@ -56,7 +56,7 @@ def loadData(dom="household", bound01=True):
     # constants
     
     data_filenames = {
-        'driving': os.path.join(dirname, 'data', 'trust_transfer_driving_cleaned.csv'), 
+        'driving': os.path.join(dirname, 'data', 'trust_transfer_driving_cleaned.csv'), # 'driving': os.path.join(dirname, 'data', 'trust_transfer_driving_cleaned__Mod.csv'), 
         'household': os.path.join(dirname, 'data', 'trust_transfer_household_cleaned.csv'),
     }
 
@@ -144,9 +144,8 @@ def loadData(dom="household", bound01=True):
           return 1 / (1 + np.exp(-x))
     
     if bound01: 
-        pretrust_scores = sigmoid(pretrust_scores-3.5)
-        trust_scores = sigmoid(trust_scores-3.5)#(trust_scores - 1) / 6
-
+        pretrust_scores = sigmoid(pretrust_scores-4.0)
+        trust_scores = sigmoid(trust_scores-4.0)#(trust_scores - 1) / 6
 
 
     data = {
@@ -246,6 +245,7 @@ def loadWordFeatures(dom, loc="wordfeats", loadpickle=False, savepickle=False):
 
     wordfeatures = featdict[dom]
 
+
     # save the data
     if savepickle:
         with open(os.path.join(dirname, 'data', 'wordfeatures.pkl'),'wb') as f:
@@ -321,6 +321,7 @@ def createDataset(data, reptype, allfeatures):
         for t in range(obsseqlen):
             tasksobsids[t, i, :] = tasks_obs[i, t]
             tasksobsfeats[t, i, :] = getInputRep(tasks_obs[i, t], nfeats, reptype=reptype, feats=taskfeatures)
+
 
     tasksobsfeats = np.tile(tasksobsfeats, [1, predseqlen, 1])
     tasksobsids = np.tile(tasksobsids, [1, predseqlen, 1])
@@ -986,7 +987,8 @@ def main(
     wordfeatures = loadWordFeatures(dom, loadpickle=True)
     # wordfeatures = loadWordFeatures(dom, loadpickle=False)
 
-    
+
+  
     # in the experiments in the paper, we use the word features directly. However, 
     # you can also use tsne or pca dim-reduced features. 
     tsnefeatures = computeTSNEFeatures(wordfeatures)
@@ -1401,7 +1403,16 @@ if __name__ == "__main__":
         print("printing results: mae, predloss, predtrust_test --- outtrustpred_test\n\n")
         print(result)
 
-        print("\n\n")        
+        print("\n\n")
+        
+        print("MAEs")
+        for i in range(len(allresults)):
+            print(allresults[i][0])
+
+        print("\n\nPredLosses")
+        for i in range(len(allresults)):
+            print(allresults[i][1])
+
 
         resultsdir = "results"
         filename =  dom + "_" + modeltype + "_" + str(taskrepsize) + "_" + splittype + "_" + str(gpmode) + ".pkl"
