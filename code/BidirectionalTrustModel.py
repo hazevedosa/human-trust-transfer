@@ -33,24 +33,27 @@ class BidirectionalTrustModel(torch.nn.Module):
         super(BidirectionalTrustModel, self).__init__()
 
 
-        self.modelname = modelname
+        self.modelname = modelname # modelname
 
         self.capabilityRepresentationSize = capabilityRepresentationSize # how many capabilities are represented
         self.capabilityEdges = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False) # initialized as zeros
+
+        self.discretizationBins = 10 # how many bins in each dimension
+        self.updateProbabilityDistribution() # probability distribution tensor
+
 
         self.betas = Parameter(dtype(20.0 * np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
         # self.zetas = Parameter(dtype(np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
         self.zetas = dtype(np.ones( self.capabilityRepresentationSize )) # or only ones
 
+        self.counter = 0
 
-        self.discretizationBins = 10
-        self.probabilityDistribution = self.updateProbabilityDistribution()
 
 
     # Forward Method (model process)
     def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks, tasksobsids, taskspredids):
 
-        
+        # parameters
 
         tasksPerObservationSequence = inptasksobs.shape[0]  # 51 for our dataset // 2 for Soh's
         observationSequencesNumber  = inptasksobs.shape[1]  # 255 for our dataset // 192 or 186 for Soh's
@@ -59,13 +62,12 @@ class BidirectionalTrustModel(torch.nn.Module):
                                                                                                       # (255, 1) for our dataset // (both)
 
 
-
         # for each (of the 255) observations sequence prior to trust predictions
         for i in range(observationSequencesNumber):
             
             # re-initialize the capability
             self.capabilityEdges = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False)
-            self.probabilityDistribution = self.updateProbabilityDistribution()
+            self.updateProbabilityDistribution()
 
 
             ## Capabilities estimation loop
@@ -82,7 +84,9 @@ class BidirectionalTrustModel(torch.nn.Module):
 
         trust = predictedTrust
 
-        return trust
+        return dtype(trust)
+
+
 
     # Auxiliary Methods
     def capabilityUpdate(self, observedTask, observedTaskPerformance, observedTaskID):
@@ -90,16 +94,25 @@ class BidirectionalTrustModel(torch.nn.Module):
         observedCapability = self.requirementTransform(observedTaskID)
         taskIsNonZero, taskSuccess = self.getSuccessOrFailBools(observedTaskPerformance)
 
+        capabilityEdgesChanged = False
+
         if taskIsNonZero:
             if taskSuccess:
                 for i in range(self.capabilityRepresentationSize):
                     if observedCapability[i] > self.capabilityEdges[i]:
                         self.capabilityEdges[i] = observedCapability[i]
+                        capabilityEdgesChanged = True
             else:
                 for i in range(self.capabilityRepresentationSize):
                     if self.capabilityEdges[i] > observedCapability[i]:
                         self.capabilityEdges[i] = observedCapability[i]
+                        capabilityEdgesChanged = True
+
+        if capabilityEdgesChanged == True:
+            self.updateProbabilityDistribution()
+
         return
+
 
     def requirementTransform(self, observedTaskID):
         if self.capabilityRepresentationSize == 3:
@@ -122,7 +135,8 @@ class BidirectionalTrustModel(torch.nn.Module):
             observedCapability = torch.squeeze(capabilitiesMatrix[:, observedTaskID])
 
         return observedCapability
-    
+
+
     def getSuccessOrFailBools(self, observedTaskPerformance):
         
         if not(observedTaskPerformance[0]) and not(observedTaskPerformance[1]):
@@ -139,38 +153,58 @@ class BidirectionalTrustModel(torch.nn.Module):
             raise SystemExit(0)
 
         return taskIsNonZero, taskSuccess
-    
+
+
     def computeTrust(self, inptaskspredID):
 
         requiredCapability = self.requirementTransform(inptaskspredID)
+
+        trust = 0.0
+
+        if self.capabilityRepresentationSize == 1:
+            for j in range(self.discretizationBins):
+                stepInDim_j = (j + 0.5) / self.discretizationBins
+                trust = trust + self.trustGivenCapability([stepInDim_j], requiredCapability) * self.probabilityDistribution[j]
+
+        elif self.capabilityRepresentationSize == 3:
+            for l in range(self.discretizationBins):
+                stepInDim_l = (l + 0.5) / self.discretizationBins
+                for k in range(self.discretizationBins):
+                    stepInDim_k = (k + 0.5) / self.discretizationBins
+                    for j in range(self.discretizationBins):
+                        stepInDim_j = (j + 0.5) / self.discretizationBins
+                        trust = trust + self.trustGivenCapability([stepInDim_j, stepInDim_k, stepInDim_l], 
+                                                                    requiredCapability) * self.probabilityDistribution[j, k, l]
+
+        return trust
+
+
+    def trustGivenCapability(self, capability, requiredCapability):
 
         trust = 1.0
 
         for i in range(self.capabilityRepresentationSize):
 
-            p_i = self.betas[i] * (requiredCapability[i] - self.capabilityEdges[i])
+            p_i = self.betas[i] * (requiredCapability[i] - capability[i])
             d_i = ( 1 + torch.exp(p_i) ) ** ( - self.zetas[i] * self.zetas[i] )
             # d_i = ( 1 + torch.exp(p_i) ) ** ( - 1 )
 
             trust = trust * d_i
 
-        # print(self.zetas)
+        return trust
 
-        return dtype(trust)
 
     def updateProbabilityDistribution(self):
 
+        # Vector to start the distribution tensor
         probabilityStarter = tuple(self.discretizationBins * np.ones((self.capabilityRepresentationSize), dtype = int))
 
+        # Distribution tensors
         probabilityDistribution = torch.ones(probabilityStarter, dtype = torch.int8)
         zeroProbability = torch.ones(probabilityStarter, dtype = torch.int8)
 
 
-        self.capabilityEdges[0, 0] = 0.5
-        self.capabilityEdges[1, 0] = 0.5
-        self.capabilityEdges[2, 0] = 0.5
-
-
+        # hardcoded solution: for 1 dim
         if self.capabilityRepresentationSize == 1:
             for j in range(self.discretizationBins):
                 step = (j + 0.5) / self.discretizationBins
@@ -178,10 +212,10 @@ class BidirectionalTrustModel(torch.nn.Module):
                     probabilityDistribution[j] = 0
             
             probabilityDistribution = probabilityDistribution.float()
+            probabilityDistribution = dtype(probabilityDistribution)
             probabilityDistribution = probabilityDistribution / torch.sum(probabilityDistribution)
 
-
-
+        # hardcoded solution: for 3 dim
         elif self.capabilityRepresentationSize == 3:
             for j in range(self.discretizationBins):
                 step = (j + 0.5) / self.discretizationBins
@@ -199,8 +233,10 @@ class BidirectionalTrustModel(torch.nn.Module):
                     zeroProbability[:, :, j] = 0
 
             probabilityDistribution = probabilityDistribution - zeroProbability
-
             probabilityDistribution = probabilityDistribution.float()
+            probabilityDistribution = dtype(probabilityDistribution)
+
             probabilityDistribution = probabilityDistribution / torch.sum(probabilityDistribution)
 
-        return probabilityDistribution
+        self.probabilityDistribution = probabilityDistribution
+        return
