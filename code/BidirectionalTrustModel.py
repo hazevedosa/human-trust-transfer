@@ -38,13 +38,15 @@ class BidirectionalTrustModel(torch.nn.Module):
         self.capabilityRepresentationSize = capabilityRepresentationSize # how many capabilities are represented
         self.capabilityEdges = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False) # initialized as zeros
 
-        self.discretizationBins = 10 # how many bins in each dimension
+        self.discretizationBins = 12 # how many bins in each dimension
         self.updateProbabilityDistribution() # probability distribution tensor
 
 
         self.betas = Parameter(dtype(20.0 * np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
-        # self.zetas = Parameter(dtype(np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
-        self.zetas = dtype(np.ones( self.capabilityRepresentationSize )) # or only ones
+        self.zetas = Parameter(dtype(np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
+        # self.zetas = dtype(np.ones( self.capabilityRepresentationSize )) # or only ones
+
+        self.optimizedCapabilitiesMatrix = Parameter(dtype(np.random.rand(1, 12))) # parameters to be optimized
 
         self.counter = 0
 
@@ -116,14 +118,16 @@ class BidirectionalTrustModel(torch.nn.Module):
 
     def requirementTransform(self, observedTaskID):
         if self.capabilityRepresentationSize == 3:
-            capabilitiesMatrix = 0.01 * np.array(   [[0.0, 33.0, 50.0, 43.0, 56.0, 67.0, 62.0, 47.0, 50.0, 51.0, 64.0, 64.0, 68.0],
-                                                     [0.0, 33.0, 49.0, 39.0, 58.0, 67.0, 60.0, 54.0, 52.0, 52.0, 67.0, 69.0, 71.0],
-                                                     [0.0, 33.0, 42.0, 39.0, 44.0, 52.0, 49.0, 42.0, 45.0, 46.0, 52.0, 53.0, 56.0]]  )
+            capabilitiesMatrix = 0.01 * np.array(   [[0.0, 67.0, 50.0, 56.0, 33.0, 62.0, 43.0, 68.0, 47.0, 64.0, 51.0, 64.0, 50.0],
+                                                     [0.0, 67.0, 49.0, 58.0, 33.0, 60.0, 39.0, 71.0, 54.0, 67.0, 52.0, 69.0, 52.0],
+                                                     [0.0, 52.0, 42.0, 44.0, 33.0, 49.0, 39.0, 56.0, 42.0, 52.0, 46.0, 53.0, 45.0]]  )
  
         elif self.capabilityRepresentationSize == 1:
-            capabilitiesMatrix = np.array(   [[0.0, 0.4378234991, 0.4559964897, 0.5, 0.5, 0.5166604966, 0.5533673728, 
-                                               0.5621765009, 0.6791786992, 0.7310585786, 0.7997312284, 0.8066786302, 0.880797078]]   )
-
+            # capabilitiesMatrix = np.array(   [[0.0, 0.4378234991, 0.3208213008, 0.4833395034, 0.119202922, 0.4466326272, 0.1933213698,
+            #                                                         0.5, 0.2689414214, 0.5440035103, 0.5, 0.5621765009, 0.2002687716]]   )
+            capabilitiesMatrix = torch.zeros(1, 13)
+            capabilitiesMatrix[:, 1:] = self.sigm(self.optimizedCapabilitiesMatrix)
+            
         capabilitiesMatrix = dtype(capabilitiesMatrix)
 
         observedTaskID = int(observedTaskID)
@@ -154,6 +158,9 @@ class BidirectionalTrustModel(torch.nn.Module):
 
         return taskIsNonZero, taskSuccess
 
+
+    def sigm(self, x):
+        return 1 / (1 + torch.exp(-x))
 
     def computeTrust(self, inptaskspredID):
 
@@ -187,7 +194,6 @@ class BidirectionalTrustModel(torch.nn.Module):
 
             p_i = self.betas[i] * (requiredCapability[i] - capability[i])
             d_i = ( 1 + torch.exp(p_i) ) ** ( - self.zetas[i] * self.zetas[i] )
-            # d_i = ( 1 + torch.exp(p_i) ) ** ( - 1 )
 
             trust = trust * d_i
 
