@@ -43,8 +43,8 @@ class BidirectionalTrustModel(torch.nn.Module):
 
 
         self.betas = Parameter(dtype(20.0 * np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
-        self.zetas = Parameter(dtype(np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
-        # self.zetas = dtype(np.ones( self.capabilityRepresentationSize )) # or only ones
+        # self.zetas = Parameter(dtype(np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
+        self.zetas = dtype(np.ones( self.capabilityRepresentationSize )) # or only ones
 
         self.optimizedCapabilitiesMatrix = Parameter(dtype(np.random.rand(1, 12))) # parameters to be optimized
 
@@ -53,7 +53,7 @@ class BidirectionalTrustModel(torch.nn.Module):
 
 
     # Forward Method (model process)
-    def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks, tasksobsids, taskspredids):
+    def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks, tasksobsids, taskspredids, difficulties_obs, difficulties_pred):
 
         # parameters
 
@@ -62,6 +62,7 @@ class BidirectionalTrustModel(torch.nn.Module):
         trustPredictionsNumber      = 1                     # adequate to the dataset format... // (both)
         predictedTrust              = Variable(dtype(np.zeros((observationSequencesNumber, trustPredictionsNumber))), requires_grad=False) 
                                                                                                       # (255, 1) for our dataset // (both)
+
 
 
         # for each (of the 255) observations sequence prior to trust predictions
@@ -75,14 +76,14 @@ class BidirectionalTrustModel(torch.nn.Module):
             ## Capabilities estimation loop
             # checks each task on the observation sequence
             for j in range(tasksPerObservationSequence):
-                self.capabilityUpdate(inptasksobs[j,i,:], inptasksperf[j,i,:], tasksobsids[j,i,0])
+                self.capabilityUpdate(inptasksobs[j,i,:], inptasksperf[j,i,:], tasksobsids[j,i,0], difficulties_obs[j, i, 0])
 
 
             ## Trust computation loop
             # computes trust for each input task... But in our dataset we consider only 1
             for j in range(trustPredictionsNumber):
                 # predictedTrust[i, j] = self.computeTrust(inptaskspred[i, j])
-                predictedTrust[i, j] = self.computeTrust(taskspredids[i, 0])
+                predictedTrust[i, j] = self.computeTrust(taskspredids[i, 0], difficulties_pred[i, 0])
 
         trust = predictedTrust
 
@@ -91,9 +92,9 @@ class BidirectionalTrustModel(torch.nn.Module):
 
 
     # Auxiliary Methods
-    def capabilityUpdate(self, observedTask, observedTaskPerformance, observedTaskID):
+    def capabilityUpdate(self, observedTask, observedTaskPerformance, observedTaskID, observedTaskDifficulty):
 
-        observedCapability = self.requirementTransform(observedTaskID)
+        observedCapability = self.requirementTransform(observedTaskID, observedTaskDifficulty)
         taskIsNonZero, taskSuccess = self.getSuccessOrFailBools(observedTaskPerformance)
 
         capabilityEdgesChanged = False
@@ -116,28 +117,33 @@ class BidirectionalTrustModel(torch.nn.Module):
         return
 
 
-    def requirementTransform(self, observedTaskID):
-        if self.capabilityRepresentationSize == 3:
-            capabilitiesMatrix = 0.01 * np.array(   [[0.0, 67.0, 50.0, 56.0, 33.0, 62.0, 43.0, 68.0, 47.0, 64.0, 51.0, 64.0, 50.0],
-                                                     [0.0, 67.0, 49.0, 58.0, 33.0, 60.0, 39.0, 71.0, 54.0, 67.0, 52.0, 69.0, 52.0],
-                                                     [0.0, 52.0, 42.0, 44.0, 33.0, 49.0, 39.0, 56.0, 42.0, 52.0, 46.0, 53.0, 45.0]]  )
- 
-        elif self.capabilityRepresentationSize == 1:
-            # capabilitiesMatrix = np.array(   [[0.0, 0.4378234991, 0.3208213008, 0.4833395034, 0.119202922, 0.4466326272, 0.1933213698,
-            #                                                         0.5, 0.2689414214, 0.5440035103, 0.5, 0.5621765009, 0.2002687716]]   )
-            capabilitiesMatrix = torch.zeros(1, 13)
-            capabilitiesMatrix[:, 1:] = self.sigm(self.optimizedCapabilitiesMatrix)
-            
-        capabilitiesMatrix = dtype(capabilitiesMatrix)
+    def requirementTransform(self, observedTaskID, observedTaskDifficulty=None):
+        if observedTaskDifficulty == None:
+            if self.capabilityRepresentationSize == 3:
+                capabilitiesMatrix = 0.01 * np.array(   [[0.0, 67.0, 50.0, 56.0, 33.0, 62.0, 43.0, 68.0, 47.0, 64.0, 51.0, 64.0, 50.0],
+                                                        [0.0, 67.0, 49.0, 58.0, 33.0, 60.0, 39.0, 71.0, 54.0, 67.0, 52.0, 69.0, 52.0],
+                                                        [0.0, 52.0, 42.0, 44.0, 33.0, 49.0, 39.0, 56.0, 42.0, 52.0, 46.0, 53.0, 45.0]]  )
+    
+            elif self.capabilityRepresentationSize == 1:
+                # capabilitiesMatrix = np.array(   [[0.0, 0.4378234991, 0.3208213008, 0.4833395034, 0.119202922, 0.4466326272, 0.1933213698,
+                #                                                         0.5, 0.2689414214, 0.5440035103, 0.5, 0.5621765009, 0.2002687716]]   )
+                capabilitiesMatrix = torch.zeros(1, 13)
+                capabilitiesMatrix[:, 1:] = self.sigm(self.optimizedCapabilitiesMatrix)
+                
+            capabilitiesMatrix = dtype(capabilitiesMatrix)
 
-        observedTaskID = int(observedTaskID)
+            observedTaskID = int(observedTaskID)
 
 
-        if self.capabilityRepresentationSize == 1:
-            observedCapability = dtype(capabilitiesMatrix[:, observedTaskID])
+            if self.capabilityRepresentationSize == 1:
+                observedCapability = dtype(capabilitiesMatrix[:, observedTaskID])
+            else:
+                observedCapability = torch.squeeze(capabilitiesMatrix[:, observedTaskID])
         else:
-            observedCapability = torch.squeeze(capabilitiesMatrix[:, observedTaskID])
-
+            if self.capabilityRepresentationSize == 1:
+                observedCapability = [observedTaskDifficulty]
+            else:
+                errrrror()
         return observedCapability
 
 
@@ -162,9 +168,9 @@ class BidirectionalTrustModel(torch.nn.Module):
     def sigm(self, x):
         return 1 / (1 + torch.exp(-x))
 
-    def computeTrust(self, inptaskspredID):
+    def computeTrust(self, inptaskspredID, predictionTaskDifficulty):
 
-        requiredCapability = self.requirementTransform(inptaskspredID)
+        requiredCapability = self.requirementTransform(inptaskspredID, predictionTaskDifficulty)
 
         trust = 0.0
 

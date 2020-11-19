@@ -56,7 +56,8 @@ def loadData(dom="household", bound01=True):
     # constants
     
     data_filenames = {
-        'driving': os.path.join(dirname, 'data', 'trust_transfer_driving_cleaned.csv'), # 'driving': os.path.join(dirname, 'data', 'trust_transfer_driving_cleaned__Mod.csv'), 
+        # 'driving': os.path.join(dirname, 'data', 'trust_transfer_driving_cleaned.csv'), 
+        'driving': os.path.join(dirname, 'data', 'trust_transfer_driving_cleaned__Mod.csv'), 
         'household': os.path.join(dirname, 'data', 'trust_transfer_household_cleaned.csv'),
     }
 
@@ -102,15 +103,19 @@ def loadData(dom="household", bound01=True):
         nprepred = []
         npred = []
 
+        difficulties = []
+
         for row in reader:
             # these are the predicted tasks (before and observations)
             pretasks_pred += [[int(row['C_ID']), int(row['D_ID']), int(row['E_ID'])]]
-            tasks_pred += [[int(row['C_ID']), int(row['D_ID']), int(row['E_ID'])]]  
+            tasks_pred += [[int(row['C_ID']), int(row['D_ID']), int(row['E_ID'])]]
 
             # these are the scores before observations
             pretrust_scores += [[int(row['C1_rating']), int(row['D1_rating']), int(row['E1_rating'])]]
-            trust_scores += [
-                [int(row['C2_rating']), int(row['D2_rating']), int(row['E2_rating'])]]  
+            trust_scores += [[int(row['C2_rating']), int(row['D2_rating']), int(row['E2_rating'])]]  
+
+            difficulties += [[float(row['AD_e']), float(row['BD_e']), float(row['CD_e']), float(row['DD_e']), float(row['ED_e'])]]
+
 
             # this tracks if the robot suceeds or fails
             SSFF += row['B_SF']
@@ -135,6 +140,8 @@ def loadData(dom="household", bound01=True):
     tasks_pred = np.array(tasks_pred)
     trust_scores = np.array(trust_scores)
 
+    difficulties = np.array(difficulties)
+
     pretasks_pred = np.array(pretasks_pred)
     pretrust_scores = np.array(pretrust_scores)
     nparts = N  # number of participants
@@ -157,6 +164,7 @@ def loadData(dom="household", bound01=True):
         "pretrust_scores": pretrust_scores,
         "nparts": nparts,
         "labels": labels,
+        "difficulties": difficulties
     }
 
     return data, nparts
@@ -292,6 +300,8 @@ def createDataset(data, reptype, allfeatures):
     pretrust_scores = data["pretrust_scores"]
     nparts = data["nparts"]
 
+    difficulties = data["difficulties"]
+
     if reptype == "1hot":
         nfeats = 13
     elif reptype == "taskid":
@@ -334,9 +344,25 @@ def createDataset(data, reptype, allfeatures):
     tasksobsperf = np.tile(tasksobsperf, [1, predseqlen, 1])
 
 
+    difficulties_obs = np.zeros((obsseqlen, nparts, 1))
+
+    print(type(difficulties))
+    print(type(difficulties_obs))
+
+    for i in range(N):
+        for t in range(obsseqlen):
+            difficulties_obs[t, i, :] = difficulties[i, t]
+    difficulties_obs = np.tile(difficulties_obs, [1, predseqlen, 1])
+
+
+
     # create 1-hot representation for tasks to predict
     ntotalpred = int(np.prod(tasks_pred.shape))
     tasks_pred_T = tasks_pred.transpose().reshape([ntotalpred, 1])
+
+    difficulties_pred = difficulties[:, 2:].transpose().reshape([ntotalpred, 1])
+
+
     taskspredfeats = np.zeros((ntotalpred, nfeats))
     for t in range(ntotalpred):
         taskspredfeats[t, :] = getInputRep(tasks_pred_T[t][0], nfeats, reptype=reptype, feats=taskfeatures)
@@ -354,8 +380,12 @@ def createDataset(data, reptype, allfeatures):
         pretasksobsids = np.zeros((obsseqlen, N, 1))
         pretasksobsfeats = np.zeros((obsseqlen, N, nfeats))
 
+        pre_difficulties_obs = np.zeros((obsseqlen, N, 1))
+
         pretasksobsids = np.tile(pretasksobsids, [1, predseqlen, 1])
         pretasksobsfeats = np.tile(pretasksobsfeats, [1, predseqlen, 1])
+
+        pre_difficulties_obs = np.tile(pre_difficulties_obs, [1, predseqlen, 1])
 
         pretasksobsperf = np.zeros((obsseqlen, N, nperf))
         pretasksobsperf = np.tile(pretasksobsperf, [1, predseqlen, 1])
@@ -382,6 +412,11 @@ def createDataset(data, reptype, allfeatures):
         taskpredids = np.concatenate([pretasks_pred_T, tasks_pred_T])
         taskpredtrust = np.concatenate([pretrust_scores_T, trust_scores_T])
 
+        difficulties_obs = np.column_stack([pre_difficulties_obs, difficulties_obs])
+        difficulties_pred = np.concatenate([difficulties_pred, difficulties_pred])
+
+
+
     # ok, I got too lazy to create a dict, using a tuple for now.
 
     # So, here we have 192 or 186 dimensions long datasets. Basically they have stacked up the 1st ratings, 
@@ -391,14 +426,16 @@ def createDataset(data, reptype, allfeatures):
 
 
     dataset = (
-               tasksobsfeats,   # (2, 192, 50) or (2, 186, 50)  [numpy.ndarray]
-               tasksobsperf,    # (2, 192, 2) or (2, 186, 2)    [numpy.ndarray]
-               taskspredfeats,  # (192, 50) or (186, 50)        [numpy.ndarray]
-               trustpred,       # (192,) or (186,)              [numpy.ndarray]
-               tasksobsids,     # (2, 192, 1) or (2, 186, 1)    [numpy.ndarray]
-               taskpredids,     # (192, 1) or (186, 1)          [numpy.ndarray]
-               taskpredtrust,   # (192, 1) or (186, 1)          [numpy.ndarray]
-               data["labels"]   # ['0-0', 'A-5', 'A-3', 'A-6', 'A-1', 'A-4', 'A-2', 'B-4', 'B-2', 'B-5', 'B-1', 'B-6', 'B-3'] for household [list]
+               tasksobsfeats,       # [0] (2, 192, 50) or (2, 186, 50)  [numpy.ndarray]
+               tasksobsperf,        # [1] (2, 192, 2) or (2, 186, 2)    [numpy.ndarray]
+               taskspredfeats,      # [2] (192, 50) or (186, 50)        [numpy.ndarray]
+               trustpred,           # [3] (192,) or (186,)              [numpy.ndarray]
+               tasksobsids,         # [4] (2, 192, 1) or (2, 186, 1)    [numpy.ndarray]
+               taskpredids,         # [5] (192, 1) or (186, 1)          [numpy.ndarray]
+               taskpredtrust,       # [6] (192, 1) or (186, 1)          [numpy.ndarray]
+               data["labels"],      # [7] ['0-0', 'A-5', 'A-3', 'A-6', 'A-1', 'A-4', 'A-2', 'B-4', 'B-2', 'B-5', 'B-1', 'B-6', 'B-3'] for household [list]
+               difficulties_obs,    # [8] difficulties of observed tasks
+               difficulties_pred    # [9] difficulties of tasks to be predicted
               )
 
 
@@ -456,7 +493,7 @@ def computePCAFeatures(wordfeatures):
 
 # pval is the validation proportion
 def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfolds=10):
-    tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, labels = dataset
+    tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, labels, difficulties_obs, difficulties_pred = dataset
 
     obsseqlen = 2  # length of observation sequence
     predseqlen = 3  # length of prediction sequence
@@ -582,6 +619,9 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
     tasksobsids_train = tasksobsids[:, trainids, :]
     taskpredids_train = taskpredids[trainids, :]
 
+    difficulties_obs_train = difficulties_obs[:, trainids, :]
+    difficulties_pred_train = difficulties_pred[trainids, :]
+
     tasksobsfeats_val = tasksobsfeats[:, valids, :]
     tasksobsperf_val = tasksobsperf[:, valids, :]
     taskspredfeats_val = taskspredfeats[valids, :]
@@ -589,6 +629,9 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
 
     tasksobsids_val = tasksobsids[:, valids, :]
     taskpredids_val = taskpredids[valids, :]
+
+    difficulties_obs_val = difficulties_obs[:, valids, :]
+    difficulties_pred_val = difficulties_pred[valids, :]
 
     tasksobsfeats_test = tasksobsfeats[:, testids, :]
     tasksobsperf_test = tasksobsperf[:, testids, :]
@@ -598,6 +641,10 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
     tasksobsids_test = tasksobsids[:, testids, :]
     taskpredids_test = taskpredids[testids, :]
 
+    difficulties_obs_test = difficulties_obs[:, testids, :]
+    difficulties_pred_test = difficulties_pred[testids, :]
+    
+
     expdata = {
         "tasksobsfeats_train": tasksobsfeats_train,
         "tasksobsperf_train": tasksobsperf_train,
@@ -605,18 +652,24 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
         "trustpred_train": trustpred_train,
         "tasksobsids_train": tasksobsids_train,
         "taskpredids_train": taskpredids_train,
+        "difficulties_obs_train": difficulties_obs_train,
+        "difficulties_pred_train": difficulties_pred_train,
         "tasksobsfeats_val": tasksobsfeats_val,
         "tasksobsperf_val": tasksobsperf_val,
         "taskspredfeats_val": taskspredfeats_val,
         "trustpred_val": trustpred_val,
         "tasksobsids_val": tasksobsids_val,
         "taskpredids_val": taskpredids_val,
+        "difficulties_obs_val": difficulties_obs_val,
+        "difficulties_pred_val": difficulties_pred_val,
         "tasksobsfeats_test": tasksobsfeats_test,
         "tasksobsperf_test": tasksobsperf_test,
         "taskspredfeats_test": taskspredfeats_test,
         "trustpred_test": trustpred_test,
         "tasksobsids_test": tasksobsids_test,
         "taskpredids_test": taskpredids_test,
+        "difficulties_obs_test": difficulties_obs_test,
+        "difficulties_pred_test": difficulties_pred_test,
         "labels": data["labels"]
     }
 
@@ -976,6 +1029,7 @@ def main(
     data, nparts = loadData(dom)
 
 
+
     # recreate word vectors if needed
     # e.g., when you download new word features from glove. ----- To do it, must download "glove.6B.50d.txt" which is about 163.41 MB
     recreate_word_vectors = False
@@ -1023,6 +1077,9 @@ def main(
     tasksobsids = Variable(dtype(expdata["tasksobsids_train"]), requires_grad=False)
     taskspredids = Variable(dtype(expdata["taskpredids_train"]), requires_grad=False)
 
+    difficulties_obs = Variable(dtype(expdata["difficulties_obs_train"]), requires_grad=False)
+    difficulties_pred = Variable(dtype(expdata["difficulties_pred_train"]), requires_grad=False)
+
     inptasksobs_val = Variable(dtype(expdata["tasksobsfeats_val"]), requires_grad=False)
     inptasksperf_val = Variable(dtype(expdata["tasksobsperf_val"]), requires_grad=False)
     inptaskspred_val = Variable(dtype(expdata["taskspredfeats_val"]), requires_grad=False)
@@ -1031,6 +1088,9 @@ def main(
     tasksobsids_val = Variable(dtype(expdata["tasksobsids_val"]), requires_grad=False)
     taskspredids_val = Variable(dtype(expdata["taskpredids_val"]), requires_grad=False)
 
+    difficulties_obs_val = Variable(dtype(expdata["difficulties_obs_val"]), requires_grad=False)
+    difficulties_pred_val = Variable(dtype(expdata["difficulties_pred_val"]), requires_grad=False)
+
     inptasksobs_test = Variable(dtype(expdata["tasksobsfeats_test"]), requires_grad=False)
     inptasksperf_test = Variable(dtype(expdata["tasksobsperf_test"]), requires_grad=False)
     inptaskspred_test = Variable(dtype(expdata["taskspredfeats_test"]), requires_grad=False)
@@ -1038,6 +1098,9 @@ def main(
 
     tasksobsids_test = Variable(dtype(expdata["tasksobsids_test"]), requires_grad=False)
     taskspredids_test = Variable(dtype(expdata["taskpredids_test"]), requires_grad=False)
+
+    difficulties_obs_test = Variable(dtype(expdata["difficulties_obs_test"]), requires_grad=False)
+    difficulties_pred_test = Variable(dtype(expdata["difficulties_pred_test"]), requires_grad=False)
 
     learning_rate = 1e-3
 
@@ -1167,7 +1230,7 @@ def main(
                     N = inptaskspred.shape[0]
 
                     if modeltype == "btm":
-                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids)
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, difficulties_obs, difficulties_pred)
                     else:
                         predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
                     predtrust = torch.squeeze(predtrust)
@@ -1175,6 +1238,8 @@ def main(
                     # print(predtrust)
 
                     # logloss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0)) # / 2*torch.exp(obsnoise))
+
+
                     loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
                             torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
 
@@ -1194,7 +1259,7 @@ def main(
                 if t % reportperiod == 0:
                     # compute training loss
                     if modeltype == "btm":
-                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids)
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, difficulties_obs, difficulties_pred)
                     else:
                         predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
 
@@ -1204,7 +1269,7 @@ def main(
 
                     # compute validation loss
                     if modeltype == "btm":
-                        predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0], tasksobsids_val, taskspredids_val)
+                        predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0], tasksobsids_val, taskspredids_val, difficulties_obs_val, difficulties_pred_val)
                     else:
                         predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0])
                     predtrust_val = torch.squeeze(predtrust_val)
@@ -1214,7 +1279,7 @@ def main(
                     # compute prediction loss
                     if modeltype == "btm":
                         predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], 
-                                                                                                            tasksobsids_test, taskspredids_test))
+                                                                                                            tasksobsids_test, taskspredids_test, difficulties_obs_test, difficulties_pred_test))
                     else:
                         predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
                     
@@ -1276,6 +1341,8 @@ def main(
 
     model = torch.load(os.path.join(modeldir,  modelname + "_" + str(excludeid) + ".pth"))
 
+    print("model params", list(model.parameters()))
+
 
 
     azvTesting = False
@@ -1316,7 +1383,7 @@ def main(
 
         # make predictions using trained model and compute metrics
         if modeltype == "btm":
-            predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0], tasksobsids_azv, taskspredids_azv))
+            predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0], tasksobsids_azv, taskspredids_azv, difficulties_obs_azv, difficulties_pred_azv))
         else:
             predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0]))
 
@@ -1326,7 +1393,7 @@ def main(
 
     if not(azvTesting):
         if modeltype == "btm":
-            predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], tasksobsids_test, taskspredids_test))
+            predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], tasksobsids_test, taskspredids_test, difficulties_obs_test, difficulties_pred_test))
         else:
             predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
 
