@@ -224,6 +224,8 @@ class BidirectionalTrustModel(torch.nn.Module):
                     probabilityDistribution[j] = 0
             
             probabilityDistribution = probabilityDistribution.float()
+            if usecuda:
+                probabilityDistribution = probabilityDistribution.cuda()
             probabilityDistribution = dtype(probabilityDistribution)
             probabilityDistribution = probabilityDistribution / torch.sum(probabilityDistribution)
 
@@ -246,6 +248,8 @@ class BidirectionalTrustModel(torch.nn.Module):
 
             probabilityDistribution = probabilityDistribution - zeroProbability
             probabilityDistribution = probabilityDistribution.float()
+            if usecuda:
+                probabilityDistribution = probabilityDistribution.cuda()
             probabilityDistribution = dtype(probabilityDistribution)
 
             probabilityDistribution = probabilityDistribution / torch.sum(probabilityDistribution)
