@@ -673,7 +673,6 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
     return expdata
 
 
-
 def getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=None, pval=0.1, nfolds=10):
     tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, tasks_obs, tasks_pred, labels = dataset
 
@@ -1007,7 +1006,7 @@ def main(
         pval=0.1,
         seed=0,
         nfolds=10
-)   :
+    ):
     
     
     modelname = modeltype + "_" + str(taskrepsize) + "_" + str(gpmode) + "_" + dom + "_" + splittype + "_" + str(excludeid)
@@ -1073,6 +1072,11 @@ def main(
 
     tasksobsids = Variable(dtype(expdata["tasksobsids_train"]), requires_grad=False)
     taskspredids = Variable(dtype(expdata["taskpredids_train"]), requires_grad=False)
+
+    print(tasksobsids.shape)
+    stopHere()
+
+
 
     difficulties_obs = Variable(dtype(expdata["difficulties_obs_train"]), requires_grad=False)
     difficulties_pred = Variable(dtype(expdata["difficulties_pred_train"]), requires_grad=False)
@@ -1407,7 +1411,6 @@ def main(
     return (mae, predloss, res)
 
 
-# In[176]:
 
 if __name__ == "__main__":
 
