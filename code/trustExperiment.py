@@ -1050,6 +1050,7 @@ def main(
     # create primary dataset
     dataset = createDataset(data, reptype, allfeatures)
 
+    # --> Pay attention here <--
 
     # mat_file_name = 'RawDataset.mat'
     # dataset = createDataset_fromMatFile(mat_file_name)
@@ -1073,13 +1074,9 @@ def main(
     tasksobsids = Variable(dtype(expdata["tasksobsids_train"]), requires_grad=False)
     taskspredids = Variable(dtype(expdata["taskpredids_train"]), requires_grad=False)
 
-    print(tasksobsids.shape)
-    stopHere()
-
-
-
     difficulties_obs = Variable(dtype(expdata["difficulties_obs_train"]), requires_grad=False)
     difficulties_pred = Variable(dtype(expdata["difficulties_pred_train"]), requires_grad=False)
+
 
     inptasksobs_val = Variable(dtype(expdata["tasksobsfeats_val"]), requires_grad=False)
     inptasksperf_val = Variable(dtype(expdata["tasksobsperf_val"]), requires_grad=False)
@@ -1091,6 +1088,7 @@ def main(
 
     difficulties_obs_val = Variable(dtype(expdata["difficulties_obs_val"]), requires_grad=False)
     difficulties_pred_val = Variable(dtype(expdata["difficulties_pred_val"]), requires_grad=False)
+
 
     inptasksobs_test = Variable(dtype(expdata["tasksobsfeats_test"]), requires_grad=False)
     inptasksperf_test = Variable(dtype(expdata["tasksobsperf_test"]), requires_grad=False)
