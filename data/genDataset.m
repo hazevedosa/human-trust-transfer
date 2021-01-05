@@ -1,16 +1,9 @@
 clear all; close all;  clc;
 
 raw_table = readtable('qualtricsRawData.xlsx');
-<<<<<<< HEAD
-% raw_table(1,:) = []; % if using macOS
-=======
+
 raw_table(1,:) = []; % if using macOS
->>>>>>> 7da7f371a33da7e0d927b311bfcae73f2c5ca057
 
-num_responses = size(raw_table, 1);
-
-
-<<<<<<< HEAD
 % Text embeddings for the tasks
 
 tasks_embeddings = zeros(4, 50);
@@ -77,8 +70,9 @@ tasks_embeddings(4, :) = ...
   3.6136732e-01 -1.2350861e-01];
 
 
-=======
->>>>>>> 7da7f371a33da7e0d927b311bfcae73f2c5ca057
+
+num_responses = size(raw_table, 1);
+
 obs_task_seq = [];
 pred_task = [];
 obs_task_sens_cap_seq = [];
@@ -230,7 +224,7 @@ for i = 1:num_responses
         disp(i);
         disp('Att Chk 2 NOK');
     end
-<<<<<<< HEAD
+
     
     for j = 3:5
         if ~strcmp(participant_trust_2{1, j}{1}, '')
@@ -250,7 +244,6 @@ for i = 1:num_responses
         end
     end
     
-=======
     
     for j = 3:5
         if ~strcmp(participant_trust_2{1, j}{1}, '')
@@ -270,7 +263,7 @@ for i = 1:num_responses
         end
     end
     
->>>>>>> 7da7f371a33da7e0d927b311bfcae73f2c5ca057
+
     if attChk_3 == participant_fail_succ(participant_videos_order(3))
 %         disp(i);
 %         disp('Att Chk 3 OK');
