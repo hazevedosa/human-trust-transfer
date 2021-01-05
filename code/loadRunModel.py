@@ -242,10 +242,23 @@ def loadWordFeatures(dom, loc="wordfeats", loadpickle=False, savepickle=False):
 
     featdict = {}
 
+    # 'park, moving forward, in an empty space.'
+    # 'park, parallel to curb, in a space between cars.'
+    # 'when reaching a roundabout, check left for oncoming traffic and complete the right turn when safe.'
+    # 'when navigating on a two-way road behind a vehicle in foggy weather, check for oncoming traffic and pass when safe.'
+
+
+    # sentence = 'when navigating on a two-way road behind a vehicle in foggy weather, check for oncoming traffic and pass when safe.'
+    # print(nlp(sentence).vector)
+
+    # stopHere()
+
+
     for d,task_word_list in taskwords.items():
         wordfeatures = []
         for i in range(len(task_word_list)):
             # print("yeah thats mee", task_word_list[i][0])
+            # print(nlp(task_word_list[i][0]).vector)
             wordfeatures.append(nlp(task_word_list[i][0]).vector)
 
         wordfeatures = np.array(wordfeatures)
@@ -1028,7 +1041,7 @@ def main(
 
 
     # recreate word vectors if needed
-    # e.g., when you download new word features from glove. ----- To do it, must download "glove.6B.50d.txt" which is about 163.41 MB
+    # e.g., when you download new word features from glove. -- To do it, must download "glove.6B.50d.txt" which is about 163.41 MB
     recreate_word_vectors = False
     # recreate_word_vectors = True
     if recreate_word_vectors:
