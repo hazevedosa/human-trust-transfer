@@ -300,3 +300,30 @@ trust_pred = [trust_pred; participant_trust_predictions];
     
                                
 end
+
+obs_task_feats = zeros(size(obs_task_seq, 1), size(obs_task_seq, 2), 50);
+
+for m = 1:size(obs_task_seq, 1)
+    for n = 1:size(obs_task_seq, 2)
+        for p = 1:50
+            if obs_task_seq(m, n) ~= 0
+                obs_task_feats(m, n, p) = tasks_embeddings(obs_task_seq(m, n), p);
+            end
+        end
+    end
+end
+
+pred_task_feats = zeros(size(pred_task, 1), size(pred_task, 2), 50);
+
+for m = 1:size(pred_task, 1)
+    for n = 1:size(pred_task, 2)
+        for p = 1:50
+            if pred_task(m, n) ~= 0
+                pred_task_feats(m, n, p) = tasks_embeddings(pred_task(m, n), p);
+            end
+        end
+    end
+end
+
+
+% Save the thing...
