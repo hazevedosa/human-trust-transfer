@@ -121,7 +121,7 @@ for i = 1:num_responses
     
     if any(sensing_diff_order - sensing_diff_order_from_capabilities) ~= 0
 %         disp(i);
-%         disp('Warning in Sensing -- possibly need to remove participant.');
+        disp('Warning in Sensing -- possibly need to remove participant.');
         participant_warning = true;
     end    
     
@@ -141,7 +141,7 @@ for i = 1:num_responses
     
     if any(processing_diff_order - processing_diff_order_from_capabilities) ~= 0
 %         disp(i);
-%         disp('Warning in Processing -- possibly need to remove participant.');
+        disp('Warning in Processing -- possibly need to remove participant.');
         participant_warning = true;
     end
 
@@ -202,7 +202,7 @@ for i = 1:num_responses
 %         disp('Att Chk 1 OK');
     else
 %         disp(i);
-%         disp('Att Chk 1 NOK');
+        disp('Att Chk 1 NOK');
         participant_warning = true;
     end
     
@@ -229,7 +229,7 @@ for i = 1:num_responses
 %         disp('Att Chk 2 OK');
     else
 %         disp(i);
-%         disp('Att Chk 2 NOK');
+        disp('Att Chk 2 NOK');
         participant_warning = true;
     end
 
@@ -277,7 +277,7 @@ for i = 1:num_responses
 %         disp('Att Chk 3 OK');
     else
 %         disp(i);
-%         disp('Att Chk 3 NOK');
+        disp('Att Chk 3 NOK');
         participant_warning = true;
     end
     
