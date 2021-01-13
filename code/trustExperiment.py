@@ -444,6 +444,41 @@ def createDataset_fromMatFile(mat_file_name):
     
     mat_contents = sio.loadmat(mat_file_name)
 
+    tasksobsfeats   = mat_contents["obs_task_feats"]
+    tasksobsperf    = mat_contents["obs_task_perf_seq"]
+    taskspredfeats  = mat_contents["pred_task_feats"]
+    trustpred       = mat_contents["trust_pred"]
+    tasksobsids     = mat_contents["obs_task_seq"]
+    taskpredids     = mat_contents["pred_task"]
+    taskpredtrust   = mat_contents["trust_pred"]
+    matTasks        = mat_contents["obs_task_seq"]
+    matTaskPredIDs  = mat_contents["pred_task"]
+    data_labels     = ['Gamma-0', 'Gamma-1', 'Gamma-2', 'Gamma-3', 'Gamma-4']
+
+    trustpred = np.squeeze(trustpred)
+    taskspredfeats = np.squeeze(taskspredfeats)
+    matTasks = matTasks.T
+    tasksobsids = np.expand_dims(tasksobsids, axis=2)
+    
+    dataset = (
+               tasksobsfeats,   # (3, 63, 50)   [numpy.ndarray]
+               tasksobsperf,    # (3, 63, 2)    [numpy.ndarray]
+               taskspredfeats,  # (63, 50)      [numpy.ndarray]
+               trustpred,       # (63,)         [numpy.ndarray]
+               tasksobsids,     # (3, 63, 1)    [numpy.ndarray]
+               taskpredids,     # (63, 1)       [numpy.ndarray]
+               taskpredtrust,   # (63, 1)       [numpy.ndarray]
+               matTasks,        # (63, 3)       [numpy.ndarray]
+               matTaskPredIDs,  # (63, 1)       [numpy.ndarray]
+               data_labels      # ????????????  [list]
+    )
+
+    return dataset
+
+def createDataset_fromMatFile_(mat_file_name):
+    
+    mat_contents = sio.loadmat(mat_file_name)
+
     tasksobsfeats   = mat_contents["tasksobsfeats"]
     tasksobsperf    = mat_contents["tasksobsperf"]
     taskspredfeats  = mat_contents["taskspredfeats"]
@@ -453,7 +488,7 @@ def createDataset_fromMatFile(mat_file_name):
     taskpredtrust   = mat_contents["taskpredtrust"]
     matTasks        = mat_contents["matTasks"]
     matTaskPredIDs  = mat_contents["matTaskPredIDs"]
-    data_labels     = ['Gamma-0', 'Gamma-1', 'Gamma-2', 'Gamma-3', 'Gamma-4']
+    data_labels     = ['0-0', 'H-1', 'H-2', 'H-3', 'H-4', 'H-5']
 
     trustpred = np.squeeze(trustpred)
     tasksobsids = np.expand_dims(tasksobsids, axis=2)
@@ -472,8 +507,6 @@ def createDataset_fromMatFile(mat_file_name):
     )
 
     return dataset
-
-
 
 def computeTSNEFeatures(wordfeatures):
     tsnefeatures = TSNE(n_components=3, perplexity=5).fit_transform(np.array(wordfeatures))
@@ -677,13 +710,11 @@ def getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=None, pval=0.
     tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, tasks_obs, tasks_pred, labels = dataset
 
 
-    stopHere()
-
     obsseqlen = 3  # length of observation sequence
     predseqlen = 1  # length of prediction sequence
 
-    # tasks_obs -- matrix of tasks that were observed (32, 2)
-    # tasks_pred -- matrix of tasks that were predicted (32, 3)
+    # tasks_obs -- matrix of tasks that were observed (32, 2) // (63, 3)
+    # tasks_pred -- matrix of tasks that were predicted (32, 3) // (63, 1)
     pretasks_pred = tasks_pred # matrix of tasks that were predicted (32, 3)
     nparts = 51 # number of participants?????????
 
@@ -1055,8 +1086,11 @@ def main(
 
     # --> Pay attention here <--
 
-    mat_file_name = '..\data\MatDataset.mat'
+    mat_file_name = 'MatDataset.mat'
     dataset = createDataset_fromMatFile(mat_file_name)
+
+    # mat_file_name = 'RawDataset.mat'
+    # dataset = createDataset_fromMatFile_(mat_file_name)
 
 
     # create dataset splits
