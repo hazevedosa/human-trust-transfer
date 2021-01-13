@@ -454,6 +454,11 @@ def createDataset_fromMatFile(mat_file_name):
     matTasks        = mat_contents["obs_task_seq"]
     matTaskPredIDs  = mat_contents["pred_task"]
     data_labels     = ['Gamma-0', 'Gamma-1', 'Gamma-2', 'Gamma-3', 'Gamma-4']
+    obs_task_sens_cap_seq = mat_contents["obs_task_sens_cap_seq"]
+    obs_task_proc_cap_seq = mat_contents["obs_task_proc_cap_seq"]
+    pred_task_sens_cap = mat_contents["pred_task_sens_cap"]
+    pred_task_proc_cap = mat_contents["pred_task_proc_cap"]
+
 
     trustpred = np.squeeze(trustpred)
     taskspredfeats = np.squeeze(taskspredfeats)
@@ -461,16 +466,20 @@ def createDataset_fromMatFile(mat_file_name):
     tasksobsids = np.expand_dims(tasksobsids, axis=2)
     
     dataset = (
-               tasksobsfeats,   # (3, 63, 50)   [numpy.ndarray]
-               tasksobsperf,    # (3, 63, 2)    [numpy.ndarray]
-               taskspredfeats,  # (63, 50)      [numpy.ndarray]
-               trustpred,       # (63,)         [numpy.ndarray]
-               tasksobsids,     # (3, 63, 1)    [numpy.ndarray]
-               taskpredids,     # (63, 1)       [numpy.ndarray]
-               taskpredtrust,   # (63, 1)       [numpy.ndarray]
-               matTasks,        # (63, 3)       [numpy.ndarray]
-               matTaskPredIDs,  # (63, 1)       [numpy.ndarray]
-               data_labels      # ????????????  [list]
+               tasksobsfeats,           # (3, 63, 50)   [numpy.ndarray]
+               tasksobsperf,            # (3, 63, 2)    [numpy.ndarray]
+               taskspredfeats,          # (63, 50)      [numpy.ndarray]
+               trustpred,               # (63,)         [numpy.ndarray]
+               tasksobsids,             # (3, 63, 1)    [numpy.ndarray]
+               taskpredids,             # (63, 1)       [numpy.ndarray]
+               taskpredtrust,           # (63, 1)       [numpy.ndarray]
+               matTasks,                # (63, 3)       [numpy.ndarray]
+               matTaskPredIDs,          # (63, 1)       [numpy.ndarray]
+               data_labels,             # ???????       [list]
+               obs_task_sens_cap_seq,   # (3, 63)       [numpy.ndarray]
+               obs_task_proc_cap_seq,   # (3, 63)       [numpy.ndarray]
+               pred_task_sens_cap,      # (63, 1)       [numpy.ndarray]
+               pred_task_proc_cap,      # (63, 1)       [numpy.ndarray]
     )
 
     return dataset
@@ -707,8 +716,12 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
 
 
 def getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=None, pval=0.1, nfolds=10):
-    tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, tasks_obs, tasks_pred, labels = dataset
+    tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, tasks_obs, tasks_pred, labels, \
+    obs_task_sens_cap_seq, obs_task_proc_cap_seq, pred_task_sens_cap, pred_task_proc_cap = dataset
 
+
+    print(pred_task_proc_cap.shape)
+    stopHere()
 
     obsseqlen = 3  # length of observation sequence
     predseqlen = 1  # length of prediction sequence
