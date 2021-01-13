@@ -123,6 +123,9 @@ for i = 1:num_responses
 %         disp(i);
         disp('Warning in Sensing -- possibly need to remove participant.');
         participant_warning = true;
+        if length(sensing_capabilities) ~= length(unique(sensing_capabilities))
+            disp('But there are equal sensing capabilities.');
+        end        
     end    
     
     %% processing check
@@ -143,6 +146,9 @@ for i = 1:num_responses
 %         disp(i);
         disp('Warning in Processing -- possibly need to remove participant.');
         participant_warning = true;
+        if length(processing_capabilities) ~= length(unique(processing_capabilities))
+            disp('But there are equal processing capabilities.');
+        end
     end
 
     participant_observed_task = [[0, 0, participant_videos_order(1)];
@@ -175,7 +181,8 @@ for i = 1:num_responses
     participant_performances(:, :, 2) = [[0, 0, participant_fail_succ(participant_videos_order(1))];
                                          [0, participant_fail_succ(participant_videos_order(1)), participant_fail_succ(participant_videos_order(2))];
                                          [participant_fail_succ(participant_videos_order(1)), participant_fail_succ(participant_videos_order(2)), participant_fail_succ(participant_videos_order(3))]];
-
+    
+    participant_obs_perf_order = [participant_fail_succ(participant_videos_order(1)), participant_fail_succ(participant_videos_order(2)), participant_fail_succ(participant_videos_order(3))];
 
     participant_trust_raw = {raw_table(i, 46:50);
                              raw_table(i, 51:55);
