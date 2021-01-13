@@ -1234,8 +1234,8 @@ def main(
         }
     elif modeltype == "btm":
         
-        learning_rate = 1e-1
-        obsseqlen = 2
+        learning_rate = 1e-2
+        obsseqlen = 3
         weight_decay = 0.01
 
         modelparams = {
@@ -1314,13 +1314,16 @@ def main(
             t = 1
             #l2comp = nn.L2Loss()
 
+
             while t < 500:
 
                 def closure():
                     N = inptaskspred.shape[0]
 
                     if modeltype == "btm":
-                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, difficulties_obs, difficulties_pred)
+                        # predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, difficulties_obs, difficulties_pred)
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, \
+                             obs_task_sens_cap_seq, pred_task_sens_cap, obs_task_proc_cap_seq, pred_task_proc_cap)
                     else:
                         predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
                     predtrust = torch.squeeze(predtrust)
@@ -1349,7 +1352,9 @@ def main(
                 if t % reportperiod == 0:
                     # compute training loss
                     if modeltype == "btm":
-                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, difficulties_obs, difficulties_pred)
+                        # predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, difficulties_obs, difficulties_pred)
+                        predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0], tasksobsids, taskspredids, \
+                                            obs_task_sens_cap_seq, pred_task_sens_cap, obs_task_proc_cap_seq, pred_task_proc_cap)
                     else:
                         predtrust = model(inptasksobs, inptasksperf, inptaskspred, inptasksobs.shape[0])
 
@@ -1359,7 +1364,9 @@ def main(
 
                     # compute validation loss
                     if modeltype == "btm":
-                        predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0], tasksobsids_val, taskspredids_val, difficulties_obs_val, difficulties_pred_val)
+                        # predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0], tasksobsids_val, taskspredids_val, difficulties_obs_val, difficulties_pred_val)
+                        predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0], tasksobsids_val, taskspredids_val, \
+                        obs_task_sens_cap_seq_val, pred_task_sens_cap_val, obs_task_proc_cap_seq_val, pred_task_proc_cap_val)
                     else:
                         predtrust_val = model(inptasksobs_val, inptasksperf_val, inptaskspred_val, inptasksobs_val.shape[0])
                     predtrust_val = torch.squeeze(predtrust_val)
@@ -1368,8 +1375,10 @@ def main(
 
                     # compute prediction loss
                     if modeltype == "btm":
-                        predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], 
-                                                                                                            tasksobsids_test, taskspredids_test, difficulties_obs_test, difficulties_pred_test))
+                        # predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], tasksobsids_test, taskspredids_test, difficulties_obs_test, difficulties_pred_test))
+                        predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], tasksobsids_test, taskspredids_test, \
+                             obs_task_sens_cap_seq_test, pred_task_sens_cap_test, obs_task_proc_cap_seq_test, pred_task_proc_cap_test))
+                        
                     else:
                         predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
                     
@@ -1473,7 +1482,9 @@ def main(
 
         # make predictions using trained model and compute metrics
         if modeltype == "btm":
-            predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0], tasksobsids_azv, taskspredids_azv, difficulties_obs_azv, difficulties_pred_azv))
+            # predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0], tasksobsids_azv, taskspredids_azv, difficulties_obs_azv, difficulties_pred_azv))
+            predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0], tasksobsids_azv, taskspredids_azv, \
+                 obs_task_sens_cap_seq_azv, pred_task_sens_cap_azv, obs_task_proc_cap_seq_azv, pred_task_proc_cap_azv))
         else:
             predtrust_test = torch.squeeze(model(inptasksobs_azv, inptasksperf_azv, inptaskspred_azv, inptasksobs_azv.shape[0]))
 
@@ -1483,7 +1494,10 @@ def main(
 
     if not(azvTesting):
         if modeltype == "btm":
-            predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], tasksobsids_test, taskspredids_test, difficulties_obs_test, difficulties_pred_test))
+            # predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], tasksobsids_test, taskspredids_test, difficulties_obs_test, difficulties_pred_test))
+            predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0], \
+                tasksobsids_test, taskspredids_test, \
+                obs_task_sens_cap_seq_test, pred_task_sens_cap_test, obs_task_proc_cap_seq_test, pred_task_proc_cap_test))
         else:
             predtrust_test = torch.squeeze(model(inptasksobs_test, inptasksperf_test, inptaskspred_test, inptasksobs_test.shape[0]))
 

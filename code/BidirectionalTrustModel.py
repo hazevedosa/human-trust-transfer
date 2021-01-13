@@ -36,7 +36,7 @@ class BidirectionalTrustModel(torch.nn.Module):
         self.modelname = modelname # modelname
 
         self.capabilityRepresentationSize = capabilityRepresentationSize # how many capabilities are represented
-        self.capabilityEdges = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False) # initialized as zeros
+        self.capabilityEdges = Variable(dtype(np.ones((self.capabilityRepresentationSize,2)) * [0.0, 1.0]), requires_grad=False) # initialized as zeros and ones
 
         self.discretizationBins = 12 # how many bins in each dimension
         self.updateProbabilityDistribution() # probability distribution tensor
@@ -53,23 +53,25 @@ class BidirectionalTrustModel(torch.nn.Module):
 
 
     # Forward Method (model process)
-    def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks, tasksobsids, taskspredids, difficulties_obs, difficulties_pred):
+    def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks, tasksobsids, taskspredids, \
+                obs_task_sens_cap_seq, pred_task_sens_cap, obs_task_proc_cap_seq, pred_task_proc_cap):
 
         # parameters
 
-        tasksPerObservationSequence = inptasksobs.shape[0]  # 51 for our dataset // 2 for Soh's
-        observationSequencesNumber  = inptasksobs.shape[1]  # 255 for our dataset // 192 or 186 for Soh's
+        tasksPerObservationSequence = inptasksobs.shape[0]  # 3 for our dataset // 2 for Soh's
+        observationSequencesNumber  = inptasksobs.shape[1]  # 49 or 63 or N for our dataset // 192 or 186 for Soh's
         trustPredictionsNumber      = 1                     # adequate to the dataset format... // (both)
         predictedTrust              = Variable(dtype(np.zeros((observationSequencesNumber, trustPredictionsNumber))), requires_grad=False) 
-                                                                                                      # (255, 1) for our dataset // (both)
+                                                                                                      # (49, 1) for our dataset // (both)
 
 
 
-        # for each (of the 255) observations sequence prior to trust predictions
+
+        # for each (of the 49 * 3) observations sequence prior to trust predictions
         for i in range(observationSequencesNumber):
             
             # re-initialize the capability
-            self.capabilityEdges = Variable(dtype(np.zeros((self.capabilityRepresentationSize,1))), requires_grad=False)
+            self.capabilityEdges = Variable(dtype(np.ones((self.capabilityRepresentationSize,2)) * [0.0, 1.0]), requires_grad=False)
             self.updateProbabilityDistribution()
 
 

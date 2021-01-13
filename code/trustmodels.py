@@ -1173,7 +1173,7 @@ def initModel(modeltype, modelname, parameters):
         inputsize = parameters["inputsize"]
         taskrepsize = parameters["taskrepsize"]
         obsseqlen = parameters["obsseqlen"]
-        capabilityRepresentationSize = 1 # 1 or 3
+        capabilityRepresentationSize = 2 # sensing and processing
 
 
         model = BidirectionalTrustModel(
