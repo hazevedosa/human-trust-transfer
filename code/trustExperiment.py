@@ -453,7 +453,7 @@ def createDataset_fromMatFile(mat_file_name):
     taskpredtrust   = mat_contents["taskpredtrust"]
     matTasks        = mat_contents["matTasks"]
     matTaskPredIDs  = mat_contents["matTaskPredIDs"]
-    data_labels     = ['0-0', 'H-1', 'H-2', 'H-3', 'H-4', 'H-5']
+    data_labels     = ['Gamma-0', 'Gamma-1', 'Gamma-2', 'Gamma-3', 'Gamma-4']
 
     trustpred = np.squeeze(trustpred)
     tasksobsids = np.expand_dims(tasksobsids, axis=2)
@@ -676,8 +676,11 @@ def getTrainTestValSplit(data, dataset, splittype, excludeid=None, pval=0.1, nfo
 def getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=None, pval=0.1, nfolds=10):
     tasksobsfeats, tasksobsperf, taskspredfeats, trustpred, tasksobsids, taskpredids, taskpredtrust, tasks_obs, tasks_pred, labels = dataset
 
-    obsseqlen = 51  # length of observation sequence
-    predseqlen = 5  # length of prediction sequence
+
+    stopHere()
+
+    obsseqlen = 3  # length of observation sequence
+    predseqlen = 1  # length of prediction sequence
 
     # tasks_obs -- matrix of tasks that were observed (32, 2)
     # tasks_pred -- matrix of tasks that were predicted (32, 3)
@@ -1022,7 +1025,7 @@ def main(
     np.random.seed(seed)
 
     # load the data
-    data, nparts = loadData(dom)
+    # data, nparts = loadData(dom)
 
 
 
@@ -1034,31 +1037,31 @@ def main(
         recreateWordVectors()
 
     # load word features 
-    wordfeatures = loadWordFeatures(dom, loadpickle=True)
+    # wordfeatures = loadWordFeatures(dom, loadpickle=True)
     # wordfeatures = loadWordFeatures(dom, loadpickle=False)
 
 
   
     # in the experiments in the paper, we use the word features directly. However, 
     # you can also use tsne or pca dim-reduced features. 
-    tsnefeatures = computeTSNEFeatures(wordfeatures)
-    pcafeatures = computePCAFeatures(wordfeatures)
+    # tsnefeatures = computeTSNEFeatures(wordfeatures)
+    # pcafeatures = computePCAFeatures(wordfeatures)
     
-    allfeatures = {"wordfeat": wordfeatures, "tsne": tsnefeatures, "pca": pcafeatures}
+    # allfeatures = {"wordfeat": wordfeatures, "tsne": tsnefeatures, "pca": pcafeatures}
 
 
     # create primary dataset
-    dataset = createDataset(data, reptype, allfeatures)
+    # dataset = createDataset(data, reptype, allfeatures)
 
     # --> Pay attention here <--
 
-    # mat_file_name = 'RawDataset.mat'
-    # dataset = createDataset_fromMatFile(mat_file_name)
+    mat_file_name = '..\data\MatDataset.mat'
+    dataset = createDataset_fromMatFile(mat_file_name)
 
 
     # create dataset splits
-    expdata = getTrainTestValSplit(data, dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
-    # expdata = getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
+    # expdata = getTrainTestValSplit(data, dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
+    expdata = getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=excludeid, pval=pval, nfolds=nfolds)
     
     nfeats = allfeatures[reptype].shape[1]
 
