@@ -1,6 +1,6 @@
 clear all; close all;  clc;
 
-raw_table = readtable('qualtricsRawData.xlsx');
+raw_table = readtable('qualtricsRawData_1.xlsx');
 
 raw_table(1,:) = []; % if using macOS
 
@@ -77,6 +77,7 @@ obs_task_seq = [];
 pred_task = [];
 obs_task_sens_cap_seq = [];
 obs_task_proc_cap_seq = [];
+obs_task_perf_seq = [];
 pred_task_sens_cap = [];
 pred_task_proc_cap = [];
 trust_pred = [];
@@ -85,6 +86,8 @@ trust_pred = [];
 
 
 for i = 1:num_responses
+    
+    participant_warning = false;
     
     participant_data = raw_table(i, :);
     participant_prediction_task = str2num(participant_data.randNumber{1});
@@ -116,8 +119,8 @@ for i = 1:num_responses
     
     
     if any(sensing_diff_order - sensing_diff_order_from_capabilities) ~= 0
-%         disp(i);
-%         disp('Warning in Sensing -- possibly need to remove participant.');
+        disp(i);
+        disp('Warning in Sensing -- possibly need to remove participant.');
     end    
     
     %% processing check
@@ -135,8 +138,8 @@ for i = 1:num_responses
     
     
     if any(processing_diff_order - processing_diff_order_from_capabilities) ~= 0
-%         disp(i);
-%         disp('Warning in Processing -- possibly need to remove participant.');
+        disp(i);
+        disp('Warning in Processing -- possibly need to remove participant.');
     end
 
     participant_observed_task = [[0, 0, participant_videos_order(1)];
@@ -192,8 +195,8 @@ for i = 1:num_responses
     end
     
     if attChk_1 == participant_fail_succ(participant_videos_order(1))
-%         disp(i);
-%         disp('Att Chk 1 OK');
+        disp(i);
+        disp('Att Chk 1 OK');
     else
         disp(i);
         disp('Att Chk 1 NOK');
@@ -218,8 +221,8 @@ for i = 1:num_responses
     end
     
     if attChk_2 == participant_fail_succ(participant_videos_order(2))
-%         disp(i);
-%         disp('Att Chk 2 OK');
+        disp(i);
+        disp('Att Chk 2 OK');
     else
         disp(i);
         disp('Att Chk 2 NOK');
@@ -265,8 +268,8 @@ for i = 1:num_responses
     
 
     if attChk_3 == participant_fail_succ(participant_videos_order(3))
-%         disp(i);
-%         disp('Att Chk 3 OK');
+        disp(i);
+        disp('Att Chk 3 OK');
     else
         disp(i);
         disp('Att Chk 3 NOK');
@@ -290,6 +293,7 @@ obs_task_seq = [obs_task_seq; participant_observed_task];
 pred_task = [pred_task; participant_prediction_task];
 obs_task_sens_cap_seq = [obs_task_sens_cap_seq; participant_sensing_capabilities];
 obs_task_proc_cap_seq = [obs_task_proc_cap_seq; participant_processing_capabilities];
+obs_task_perf_seq = [obs_task_perf_seq; participant_performances];
 pred_task_sens_cap = [pred_task_sens_cap; participant_sens_cap_pred_task];
 pred_task_proc_cap = [pred_task_proc_cap; participant_proc_cap_pred_task];
 trust_pred = [trust_pred; participant_trust_predictions];
@@ -324,5 +328,24 @@ for m = 1:size(pred_task, 1)
         end
     end
 end
+
+
+% Save the thing...
+
+saving = true;
+
+if saving
+    save(...
+        '~/Documents/human-trust-transfer/data/MatDataset.mat',...
+                                              'obs_task_feats',...
+                                           'obs_task_perf_seq',...
+                                             'pred_task_feats',...
+                                                  'trust_pred',...
+                                                'obs_task_seq',...
+                                                   'pred_task',...
+                                                  'trust_pred'...
+        )
+end
+
 
 

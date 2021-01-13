@@ -1,6 +1,6 @@
 clear all; close all;  clc;
 
-raw_table = readtable('qualtricsRawData.xlsx');
+raw_table = readtable('qualtricsRawData_1.xlsx');
 
 raw_table(1,:) = []; % if using macOS
 
@@ -77,6 +77,7 @@ obs_task_seq = [];
 pred_task = [];
 obs_task_sens_cap_seq = [];
 obs_task_proc_cap_seq = [];
+obs_task_perf_seq = [];
 pred_task_sens_cap = [];
 pred_task_proc_cap = [];
 trust_pred = [];
@@ -86,7 +87,10 @@ trust_pred = [];
 
 for i = 1:num_responses
     
+    participant_warning = false;
+    
     participant_data = raw_table(i, :);
+    participant_mturk_code = str2num(participant_data.mTurkCode{1});
     participant_prediction_task = str2num(participant_data.randNumber{1});
     participant_videos_order_raw = participant_data.FL_15_DO{1};
     participant_videos_order = [str2num(participant_videos_order_raw(19)), ...
@@ -118,6 +122,7 @@ for i = 1:num_responses
     if any(sensing_diff_order - sensing_diff_order_from_capabilities) ~= 0
 %         disp(i);
 %         disp('Warning in Sensing -- possibly need to remove participant.');
+        participant_warning = true;
     end    
     
     %% processing check
@@ -137,6 +142,7 @@ for i = 1:num_responses
     if any(processing_diff_order - processing_diff_order_from_capabilities) ~= 0
 %         disp(i);
 %         disp('Warning in Processing -- possibly need to remove participant.');
+        participant_warning = true;
     end
 
     participant_observed_task = [[0, 0, participant_videos_order(1)];
@@ -195,8 +201,9 @@ for i = 1:num_responses
 %         disp(i);
 %         disp('Att Chk 1 OK');
     else
-        disp(i);
-        disp('Att Chk 1 NOK');
+%         disp(i);
+%         disp('Att Chk 1 NOK');
+        participant_warning = true;
     end
     
     for j = 3:5
@@ -221,8 +228,9 @@ for i = 1:num_responses
 %         disp(i);
 %         disp('Att Chk 2 OK');
     else
-        disp(i);
-        disp('Att Chk 2 NOK');
+%         disp(i);
+%         disp('Att Chk 2 NOK');
+        participant_warning = true;
     end
 
     
@@ -268,8 +276,9 @@ for i = 1:num_responses
 %         disp(i);
 %         disp('Att Chk 3 OK');
     else
-        disp(i);
-        disp('Att Chk 3 NOK');
+%         disp(i);
+%         disp('Att Chk 3 NOK');
+        participant_warning = true;
     end
     
     for j = 3:5
@@ -283,22 +292,23 @@ for i = 1:num_responses
                                      trust_prediction_2;
                                      trust_prediction_3];
                                  
+    if participant_warning == true
+        disp('Participant NOK. MTurk Code:');
+        disp(participant_mturk_code);
+    end
+                                 
 %% data concatenation...
 
 
-obs_task_seq = [obs_task_seq; participant_observed_task];
-pred_task = [pred_task; participant_prediction_task];
-obs_task_sens_cap_seq = [obs_task_sens_cap_seq; participant_sensing_capabilities];
-obs_task_proc_cap_seq = [obs_task_proc_cap_seq; participant_processing_capabilities];
-pred_task_sens_cap = [pred_task_sens_cap; participant_sens_cap_pred_task];
-pred_task_proc_cap = [pred_task_proc_cap; participant_proc_cap_pred_task];
-trust_pred = [trust_pred; participant_trust_predictions];
-
+    obs_task_seq = [obs_task_seq; participant_observed_task];
+    pred_task = [pred_task; participant_prediction_task];
+    obs_task_sens_cap_seq = [obs_task_sens_cap_seq; participant_sensing_capabilities];
+    obs_task_proc_cap_seq = [obs_task_proc_cap_seq; participant_processing_capabilities];
+    obs_task_perf_seq = [obs_task_perf_seq; participant_performances];
+    pred_task_sens_cap = [pred_task_sens_cap; participant_sens_cap_pred_task];
+    pred_task_proc_cap = [pred_task_proc_cap; participant_proc_cap_pred_task];
+    trust_pred = [trust_pred; participant_trust_predictions];
     
-
-
-    
-                               
 end
 
 obs_task_feats = zeros(size(obs_task_seq, 1), size(obs_task_seq, 2), 50);
@@ -327,3 +337,21 @@ end
 
 
 % Save the thing...
+
+saving = true;
+
+if saving
+    save(...
+        '~/Documents/human-trust-transfer/data/MatDataset.mat',...
+                                              'obs_task_feats',...
+                                           'obs_task_perf_seq',...
+                                             'pred_task_feats',...
+                                                  'trust_pred',...
+                                                'obs_task_seq',...
+                                                   'pred_task',...
+                                                  'trust_pred'...
+        )
+end
+
+
+
