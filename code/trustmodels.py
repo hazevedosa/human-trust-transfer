@@ -243,7 +243,7 @@ class GPTrustTransfer(torch.nn.Module):
         self.limiter = torch.nn.Tanh()
         self.Alimit = 1.0
 
-        
+      
     def getPriorMean(self,x):
 
 
@@ -724,6 +724,7 @@ class GPTrustTransfer_Mod(torch.nn.Module):
         self.fullsucc = Variable(dtype(np.eye(1)), requires_grad=False)
         self.fullfail = Variable(dtype(np.eye(1) * -1.0), requires_grad=False)
 
+
         self.inpsize = inpsize
 
         # constants     
@@ -734,7 +735,7 @@ class GPTrustTransfer_Mod(torch.nn.Module):
         self.limiter = torch.nn.Tanh()
         self.Alimit = 1.0
 
-        
+
     def getPriorMean(self,x):
         if self.usepriormean:
             return torch.dot(self.Ay[0], x[0]) + self.by
@@ -794,7 +795,6 @@ class GPTrustTransfer_Mod(torch.nn.Module):
 
                 
                 # print("----------------------")
-
                 ### first update "priors"
                 ### commented out to see what happens if there is no prior points...
 
@@ -823,13 +823,13 @@ class GPTrustTransfer_Mod(torch.nn.Module):
 
                     if not((x == 0).all()):
 
+
                         if (inptasksperf[t, i, 0] == 1).all():
                             y = self.fullfail
-                        
+
                         else:
                             y = self.fullsucc
 
-                        # print("y", y)
                         alpha, C, bvs = self.GPupdate(x, y, self.kfunc, self.kparams, alpha, C, bvs, rawx=inptasksobs[t, i, :])
 
             # perform prediction

@@ -89,12 +89,9 @@ class BidirectionalTrustModel(torch.nn.Module):
                     # difficulties_pred[i, 0])
 
 
-<<<<<<< HEAD
-=======
         print(predictedTrust)
         stopHeeeeeeee()
 
->>>>>>> 9deaf45fca112f16e944f6c44cc326fdd1800eb0
         trust = predictedTrust
 
         return dtype(trust)
