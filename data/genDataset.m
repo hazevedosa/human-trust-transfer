@@ -1,6 +1,6 @@
 clear all; close all;  clc;
 
-raw_table = readtable('qualtricsRawData_1.xlsx');
+raw_table = readtable('qualtricsRawData_4.xlsx');
 
 raw_table(1,:) = []; % if using macOS
 
@@ -299,10 +299,15 @@ for i = 1:num_responses
                                      trust_prediction_2;
                                      trust_prediction_3];
                                  
+    participant_trust_predictions_sig = 1 ./ (1.0 + exp(-(participant_trust_predictions - 4.0)));
+                                 
     if participant_warning == true
         disp('Participant NOK. MTurk Code:');
-        disp(participant_mturk_code);
+    else
+        disp('Participant OK. Mturk Code:');
     end
+    
+    disp(participant_mturk_code);
                                  
 %% data concatenation...
 
@@ -314,7 +319,7 @@ for i = 1:num_responses
     obs_task_perf_seq = [obs_task_perf_seq, participant_performances];
     pred_task_sens_cap = [pred_task_sens_cap; participant_sens_cap_pred_task];
     pred_task_proc_cap = [pred_task_proc_cap; participant_proc_cap_pred_task];
-    trust_pred = [trust_pred; participant_trust_predictions];
+    trust_pred = [trust_pred; participant_trust_predictions_sig];
     
 end
 

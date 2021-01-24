@@ -1217,7 +1217,7 @@ def main(
         learning_rate = 1e-1
         usepriormean = usepriormean
 
-        obsseqlen = 51
+        obsseqlen = 3
 
         phiinit = 1.0
         weight_decay = 0.01 #0.01

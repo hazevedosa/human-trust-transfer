@@ -89,8 +89,6 @@ class BidirectionalTrustModel(torch.nn.Module):
                     # difficulties_pred[i, 0])
 
 
-        stopHeeeeeeee()
-
         trust = predictedTrust
 
         return dtype(trust)
@@ -125,6 +123,13 @@ class BidirectionalTrustModel(torch.nn.Module):
                     elif observedCapability[i] < self.capabilityEdges[i, 1]:
                         self.capabilityEdges[i, 1] = observedCapability[i]
                         capabilityEdgesChanged = True
+
+        for i in range(self.capabilityRepresentationSize):
+            if self.capabilityEdges[i, 0] == self.capabilityEdges[i, 1]:
+                if self.capabilityEdges[i, 1] == 0.0:
+                    self.capabilityEdges[i, 1] = 1 / self.discretizationBins
+                else:
+                    self.capabilityEdges[i, 0] = self.capabilityEdges[i, 1] - 1 / self.discretizationBins
 
         if capabilityEdgesChanged == True:
             self.updateProbabilityDistribution()
@@ -182,10 +187,10 @@ class BidirectionalTrustModel(torch.nn.Module):
                         trust = trust + self.trustGivenCapability([stepInDim_j, stepInDim_k, stepInDim_l], 
                                                                     requiredCapability) * self.probabilityDistribution[j, k, l]
 
-        print("capEdges: ", self.capabilityEdges)
-        print("reqCap: ", requiredCapability)
-        print("Trust: ", trust)
-        print("------")
+        # print("capEdges: ", self.capabilityEdges)
+        # print("reqCap: ", requiredCapability)
+        # print("Trust: ", trust)
+        # print("------")
 
         return trust
 
