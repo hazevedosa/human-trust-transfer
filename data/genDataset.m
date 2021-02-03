@@ -1,6 +1,6 @@
 clear all; close all;  clc;
 
-raw_table = readtable('qualtricsRawData_4.xlsx');
+raw_table = readtable('qualtricsRawData_8.xlsx');
 
 raw_table(1,:) = []; % if using macOS
 
@@ -121,10 +121,10 @@ for i = 1:num_responses
     
     if any(sensing_diff_order - sensing_diff_order_from_capabilities) ~= 0
 %         disp(i);
-        disp('Warning in Sensing -- possibly need to remove participant.');
-        participant_warning = true;
+%         disp('Warning in Sensing -- possibly need to remove participant.');
+%         participant_warning = true;
         if length(sensing_capabilities) ~= length(unique(sensing_capabilities))
-            disp('But there are equal sensing capabilities.');
+%             disp('But there are equal sensing capabilities.');
         end        
     end    
     
@@ -144,10 +144,10 @@ for i = 1:num_responses
     
     if any(processing_diff_order - processing_diff_order_from_capabilities) ~= 0
 %         disp(i);
-        disp('Warning in Processing -- possibly need to remove participant.');
-        participant_warning = true;
+%         disp('Warning in Processing -- possibly need to remove participant.');
+%         participant_warning = true;
         if length(processing_capabilities) ~= length(unique(processing_capabilities))
-            disp('But there are equal processing capabilities.');
+%             disp('But there are equal processing capabilities.');
         end
     end
 
@@ -303,11 +303,15 @@ for i = 1:num_responses
                                  
     if participant_warning == true
         disp('Participant NOK. MTurk Code:');
+        disp(participant_mturk_code);
+        pause;
+        
     else
         disp('Participant OK. Mturk Code:');
+        disp(participant_mturk_code);
     end
     
-    disp(participant_mturk_code);
+
                                  
 %% data concatenation...
 
