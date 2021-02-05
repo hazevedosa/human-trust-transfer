@@ -43,8 +43,8 @@ class BidirectionalTrustModel(torch.nn.Module):
 
 
         self.betas = Parameter(dtype(20.0 * np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
-        self.zetas = Parameter(dtype(np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
-        # self.zetas = dtype(np.ones( self.capabilityRepresentationSize )) # or only ones
+        # self.zetas = Parameter(dtype(np.random.rand( self.capabilityRepresentationSize ))) # parameters to be optimized
+        self.zetas = dtype(np.ones( self.capabilityRepresentationSize )) # or only ones
 
         self.optimizedCapabilitiesMatrix = Parameter(dtype(np.random.rand(1, 12))) # parameters to be optimized
 

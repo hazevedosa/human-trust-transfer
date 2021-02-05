@@ -1124,7 +1124,7 @@ class BaselineTrustModel(torch.nn.Module):
         #predErfz = (torch.erf(z/self.sqrt2) + 1.0)/2.0
         return predErfz
         
-    def forward(self, inptasksobs, inptasksperf, inptaskspred):
+    def forward(self, inptasksobs, inptasksperf, inptaskspred, num_obs_tasks):
         N = inptasksobs.shape[1]
         predtrust = Variable(dtype(np.zeros((N,1))), requires_grad=False)
 

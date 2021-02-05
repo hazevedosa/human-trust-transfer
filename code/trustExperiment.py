@@ -1298,6 +1298,8 @@ def main(
 
     if runOptimization:
 
+        curve_data = []
+
         for rep in range(1):
             print("REP", rep)
 
@@ -1314,6 +1316,8 @@ def main(
             t = 1
             #l2comp = nn.L2Loss()
 
+            t_vec = []
+            loss_vec = []
 
             while t < 500:
 
@@ -1332,6 +1336,7 @@ def main(
 
                     # logloss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0)) # / 2*torch.exp(obsnoise))
 
+                    # loss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0))
 
                     loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
                             torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
@@ -1428,11 +1433,16 @@ def main(
                                 print(valloss.cpu().data.item(), bestvalloss, "Model saved : POST", counter)
                             counter += 1
 
+                t_vec += [t]
+                loss_vec += [predloss.cpu().data.item()]
+
                 if counter >= stopcount and t > burnin:
                     #torch.save(model, modeldir+ model.modelname + ".pth")
                     break
 
                 t = t + 1
+
+        curve_data = [t_vec, loss_vec]
 
     t1 = time.time()
     print("Total time: ", t1 - t0)
@@ -1511,7 +1521,7 @@ def main(
                     torch.dot((1 - outtrustpred_test), torch.log(1.0 - predtrust_test))) / predtrust_test.shape[0]
     predloss = predloss.cpu().data.item()
 
-    return (mae, predloss, res)
+    return (mae, predloss, res, curve_data)
 
 
 
@@ -1582,6 +1592,11 @@ if __name__ == "__main__":
         print("\n\nPredLosses")
         for i in range(len(allresults)):
             print(allresults[i][1])
+
+        res_dict = {"results": allresults}
+
+        sio.savemat("results_mat.mat", res_dict)
+        
 
 
         resultsdir = "results"
