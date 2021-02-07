@@ -836,8 +836,6 @@ def getTrainTestValSplit_fromMatFile(dataset, splittype, excludeid=None, pval=0.
         nval = int(np.floor(pval * ntrain))
         rids = np.random.permutation(ntrain)
         valids = trainids[rids[0:nval]]
-        
-        
         trainids = np.setdiff1d(trainids, valids)
 
 
@@ -1192,10 +1190,10 @@ def main(
     obs_task_proc_cap_seq_test = Variable(dtype(expdata["obs_task_proc_cap_seq_test"]), requires_grad=False)
     pred_task_proc_cap_test = Variable(dtype(expdata["pred_task_proc_cap_test"]), requires_grad=False)
 
-    learning_rate = 1e-3
+    learning_rate = 1e-2
 
     if modeltype == "gp":
-        learning_rate = 1e-1
+        learning_rate = 1e-2
         usepriormean = usepriormean
 
         obsseqlen = 8
@@ -1214,7 +1212,7 @@ def main(
             "usepriorpoints":usepriorpoints
         }
     elif modeltype == "gpMod":
-        learning_rate = 1e-1
+        learning_rate = 1e-2
         usepriormean = usepriormean
 
         obsseqlen = 3
@@ -1318,8 +1316,9 @@ def main(
 
             t_vec = []
             loss_vec = []
+            mae_vec = []
 
-            while t < 500:
+            while t < 5000:
 
                 def closure():
                     N = inptaskspred.shape[0]
@@ -1435,6 +1434,7 @@ def main(
 
                 t_vec += [t]
                 loss_vec += [predloss.cpu().data.item()]
+                mae_vec += [mae]
 
                 if counter >= stopcount and t > burnin:
                     #torch.save(model, modeldir+ model.modelname + ".pth")
@@ -1442,7 +1442,7 @@ def main(
 
                 t = t + 1
 
-        curve_data = [t_vec, loss_vec]
+        curve_data = [t_vec, loss_vec, mae_vec]
 
     t1 = time.time()
     print("Total time: ", t1 - t0)
@@ -1593,9 +1593,10 @@ if __name__ == "__main__":
         for i in range(len(allresults)):
             print(allresults[i][1])
 
-        res_dict = {"results": allresults}
+        res_dict = {"allresults": allresults}
+        res_mat_file_name = "results_mat_" + modeltype + ".mat"
 
-        sio.savemat("results_mat.mat", res_dict)
+        sio.savemat(res_mat_file_name, res_dict)
         
 
 
