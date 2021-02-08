@@ -1335,10 +1335,10 @@ def main(
 
                     # logloss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0)) # / 2*torch.exp(obsnoise))
 
-                    # loss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0))
+                    loss = torch.mean(torch.pow(predtrust - outtrustpred, 2.0))
 
-                    loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
-                            torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
+                    # loss = -(torch.dot(outtrustpred, torch.log(predtrust)) +
+                    #         torch.dot((1 - outtrustpred), torch.log(1.0 - predtrust))) / N
 
 
                     optimizer.zero_grad()
@@ -1594,7 +1594,7 @@ if __name__ == "__main__":
             print(allresults[i][1])
 
         res_dict = {"allresults": allresults}
-        res_mat_file_name = "results_mat_" + modeltype + ".mat"
+        res_mat_file_name = "results_mat_" + modeltype + "_minMAE.mat"
 
         sio.savemat(res_mat_file_name, res_dict)
         
