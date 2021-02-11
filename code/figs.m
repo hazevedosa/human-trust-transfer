@@ -1,8 +1,8 @@
 close all; clear all; clc;
 
-results_gp  = load('results_mat_gp_minMAE.mat');
-results_btm = load('results_mat_btm_minMAE.mat');
-results_opt = load('results_mat_lineargaussian_minMAE.mat');
+results_gp  = load('results_mat_gp');
+results_btm = load('results_mat_btm');
+results_opt = load('results_mat_lineargaussian.mat');
 
 lcs_gp  = results_gp.allresults(:, 4);
 lcs_btm = results_btm.allresults(:, 4);
@@ -44,6 +44,7 @@ if (plot_fig1 == true)
     end
 
     figure(1)
+    set(gcf, 'Position', [10 10 1800 300])
     subplot(1, 4, 2)
     curve = plot(data_avg_gp(1, :), data_avg_gp(2, :), 'LineWidth', 1);
     hold on
@@ -192,6 +193,7 @@ if(plot_fig2 == true)
     end
 
     figure(2)
+    set(gcf, 'Position', [10 10 1800 300])
     subplot(1, 4, 2)
     curve = plot(data_avg_gp(1, :), data_avg_gp(3, :), 'LineWidth', 1);
     hold on

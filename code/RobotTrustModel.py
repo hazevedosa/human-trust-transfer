@@ -41,6 +41,11 @@ class RobotTrustModel(torch.nn.Module):
         n_bins = bin_centers.shape[0]
         trust = torch.zeros(n_bins)
 
+        if(self.pre_lambda_l > self.pre_lambda_u):
+            buf = self.pre_lambda_l
+            self.pre_lambda_l = self.pre_lambda_u
+            self.pre_lambda_u = buf
+
         lambda_l = self.sigm(self.pre_lambda_l)
         lambda_u = self.sigm(self.pre_lambda_u)
         beta = self.pre_beta * self.pre_beta
@@ -87,11 +92,11 @@ if __name__ == "__main__":
     bin_c = [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95]
     bin_c = dtype(bin_c)
 
-    obs_probs = [1, 1, 1, 0.8667, 0.2500, 0.1429, 0, 0, 0, 0]
+    obs_probs = [1, 1, 1, 1, 0.80556, 0.47273, 0.13333, 0, 0, 0]
     obs_probs = dtype(obs_probs)
 
-    learning_rate = 0.1
-    weight_decay = 0.01
+    learning_rate = 0.001
+    weight_decay = 0.0001
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
@@ -99,7 +104,7 @@ if __name__ == "__main__":
 
     report_period = 100
 
-    while t < 500:
+    while t < 100000:
 
         def closure():
             diff = model(bin_c) - obs_probs
