@@ -1,11 +1,11 @@
 close all; clear all; clc;
 
-b = 500;
+b = 800;
 
-l1 = 0.549;
-u1 = 0.55;
-l2 = 0.74;
-u2 = 0.76;
+l1 = 0.5;
+u1 = 0.6;
+l2 = 0.73;
+u2 = 0.77;
 
 dl = 0.01;
 
@@ -14,4 +14,34 @@ vv = 0.0:dl:1.0;
 [L1, L2] = meshgrid(vv, vv);
 
 T = trust(l1, u1, b, L1) .* trust(l2, u2, b, L2);
-surf(L1, L2, T, 'EdgeColor','none', 'FaceAlpha', 0.5)
+
+figure()
+set(gcf, 'Position', [10 10 500 500])
+surf(L1, L2, T, 'EdgeColor','none', 'FaceAlpha', 0.35)
+view([50 30])
+hold on
+
+poly_Xs1 = [-0.1 1.1 1.1 -0.1];
+poly_Ys1 = [l2 l2 u2 u2];
+
+pgon1 = polyshape(poly_Xs1, poly_Ys1);
+plot(pgon1, 'FaceColor', [1 1 1], 'FaceAlpha', 0.0, 'LineStyle', ':', 'EdgeColor')
+
+
+poly_Xs2 = [l1 u1 u1 l1];
+poly_Ys2 = [-0.1 -0.1 1.1 1.1];
+
+pgon2 = polyshape(poly_Xs2, poly_Ys2);
+plot(pgon2, 'FaceColor', [1 1 1], 'FaceAlpha', 0.0, 'LineStyle', ':')
+
+poly_Xs3 = [l1 u1 u1 l1];
+poly_Ys3 = [l2 l2 u2 u2];
+
+pgon3 = polyshape(poly_Xs3, poly_Ys3);
+plot(pgon3, 'FaceColor', [0.5 0.5 0.5], 'FaceAlpha', 1.0)
+
+axis([0 1 0 1])
+
+zlabel('$\tau$','Interpreter','latex', 'FontSize',20)
+xlabel('$\bar{\lambda}_1$','Interpreter','latex', 'FontSize',20)
+ylabel('$\bar{\lambda}_2$','Interpreter','latex', 'FontSize',20)
