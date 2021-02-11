@@ -16,7 +16,7 @@ u2 = max(lims(2, :));
 %% Generate new data or not?
 
 
-generatingNew = false;
+generatingNew = true;
 
 if generatingNew == true
 
