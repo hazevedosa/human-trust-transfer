@@ -8,7 +8,7 @@ norm_epochs = linspace(0, 1, length(tt));
 
 
 figure(1)
-set(gcf, 'Position', [10 10 1800 500])
+set(gcf, 'Position', [10 10 3000 800])
 subplot(1, 4, 1)
 
 plot(norm_epochs, l_1, norm_epochs, u_1);
@@ -49,7 +49,7 @@ for i = 1:rectangles
     
     
     pgon = polyshape(poly_Xs, poly_Ys);
-    plot(pgon, 'FaceColor', [0 0 0], 'LineStyle', 'none', 'FaceAlpha', 0.1)
+    plot(pgon, 'FaceColor', [1 1 1], 'FaceAlpha', 1.0)
     axis equal
     axis([0 1 0 1])
     set(gca,'XTick',[0:0.1:1])

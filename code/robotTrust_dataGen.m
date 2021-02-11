@@ -38,7 +38,7 @@ if generatingNew == true
 else
     
     load('fixed_tasks_robotTrust.mat')
-    num_tasks = 1000; %max 10000
+    num_tasks = 800; %max 10000
 
     p = p_from_mat(:, 1:num_tasks);
     perfs = perfs_from_mat(:, 1:num_tasks);

@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
-    loss_tolerance = 0.0001
+    loss_tolerance = 0.0005
 
     t = 0
     report_period = 100
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     loss_to_save = []
 
 
-    while t < 2250:
+    while t < 1820:
 
         def closure():
             diff = model(bin_c, obs_probs_idxs) - obs_probs_vect
