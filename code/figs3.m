@@ -5,23 +5,26 @@ load('resultsRobotTrust_2Dim.mat')
 
 
 norm_epochs = linspace(0, 1, length(tt));
+norm_epochs_2 = linspace(0, 0.5, length(tt));
 
 
 figure(1)
-set(gcf, 'Position', [10 10 3000 800])
+set(gcf, 'Position', [10 10 1200 200])
 subplot(1, 4, 1)
 
-plot(norm_epochs, l_1, norm_epochs, u_1);
+plot(norm_epochs_2, l_1, 'y', norm_epochs_2, u_1, 'm','LineWidth',1.25);
 axis equal
-axis([0 1 0 1])
-set(gca,'XTick',[0:0.1:1])
+axis([0 0.5 0 1])
+set(gca,'XTick',[0:0.5:1])
+set(gca,'YTick',[0:0.5:1])
 grid on
 
 subplot(1, 4, 2)
-plot(norm_epochs, l_2, norm_epochs, u_2);
+plot(norm_epochs_2, l_2, norm_epochs_2, u_2,'LineWidth',1.25);
 axis equal
-axis([0 1 0 1])
-set(gca,'XTick',[0:0.1:1])
+axis([0 0.5 0 1])
+set(gca,'XTick',[0:0.5:1])
+set(gca,'YTick',[0:0.5:1])
 grid on
 
 
@@ -42,7 +45,7 @@ areas = (u_1 - l_1) .* (u_2 - l_2);
 
 
 subplot(1, 4, 3)
-for i = 1:rectangles
+for i = rectangles:rectangles
     
     poly_Xs = [l_1(idxs(i)) u_1(idxs(i)) u_1(idxs(i)) l_1(idxs(i))];
     poly_Ys = [l_2(idxs(i)) l_2(idxs(i)) u_2(idxs(i)) u_2(idxs(i))];
@@ -52,7 +55,8 @@ for i = 1:rectangles
     plot(pgon, 'FaceColor', [1 1 1], 'FaceAlpha', 1.0)
     axis equal
     axis([0 1 0 1])
-    set(gca,'XTick',[0:0.1:1])
+    set(gca,'XTick',[0:0.5:1])
+    set(gca,'YTick',[0:0.5:1])
     hold on
     
 end
@@ -73,7 +77,8 @@ for i = 1:total_num_tasks
     end
     axis equal
     axis([0 1 0 1])
-    set(gca,'XTick',[0:0.1:1])
+    set(gca,'XTick',[0:0.5:1])
+    set(gca,'YTick',[0:0.5:1])
     hold on
 end
 
