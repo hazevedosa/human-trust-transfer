@@ -143,7 +143,7 @@ if __name__ == "__main__":
     loss_to_save = []
 
 
-    while t < 1820:
+    while t < 1520:
 
         def closure():
             diff = model(bin_c, obs_probs_idxs) - obs_probs_vect

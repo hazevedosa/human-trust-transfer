@@ -2,10 +2,10 @@ close all; clear all; clc;
 
 b = 500;
 
-l1 = 0.2;
-u1 = 0.5;
-l2 = 0.2;
-u2 = 0.4;
+l1 = 0.0;
+u1 = 1.0;
+l2 = 0.0;
+u2 = 1.0;
 
 dl = 0.02;
 
@@ -16,7 +16,7 @@ vv = 0.0:dl:1.0;
 T = trust(l1, u1, b, L1) .* trust(l2, u2, b, L2);
 
 figure()
-set(gcf, 'Position', [10 10 550 450])
+set(gcf, 'Position', [10 10 300 250])
 surf(L1, L2, T, 'EdgeColor',[0 0 0], 'FaceAlpha', 0.3, 'EdgeAlpha', 0.2)
 view([45 45])
 hold on

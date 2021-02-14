@@ -16,7 +16,7 @@ u2 = max(lims(2, :));
 %% Generate new data or not?
 
 
-generatingNew = true;
+generatingNew = false;
 
 if generatingNew == true
 
@@ -38,7 +38,7 @@ if generatingNew == true
 else
     
     load('fixed_tasks_robotTrust.mat')
-    num_tasks = 800; %max 10000
+    num_tasks = 2; %max 10000
 
     p = p_from_mat(:, 1:num_tasks);
     perfs = perfs_from_mat(:, 1:num_tasks);
