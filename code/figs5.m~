@@ -1,0 +1,14 @@
+close all; clear all; clc;
+
+
+x = 0:0.01:1;
+y = zeros(length(x))
+;
+l = 0.2;
+u = 0.8;
+
+for i = 1:length(x)
+    if(x(i) >= l && x(i) < u)
+        y(i) = 1
+    end
+end

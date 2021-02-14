@@ -4,8 +4,8 @@ close all; clear all; clc;
 x = 0:0.001:1;
 y = 0:0.001:1;
 
-beta = [1 100];
-zeta = [0.1 10];
+beta = [1 100000000];
+zeta = [0.1 100000000];
 
 
 figure(1)
